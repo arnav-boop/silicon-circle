@@ -39,16 +39,48 @@ export default function ChatPage() {
     }
     loadMessages()
 
-    const sub = supabase
-      .channel(`chat:${activeChannel.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel.id}` },
-        (p) => {
-          console.log('New message received:', p.new)
-          setMessages(prev => [...prev, p.new as Message])
-        }
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(sub) }
+    const channel = supabase.channel(`chat:${activeChannel.id}`)
+    
+    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel.id}` },
+      (p) => {
+        console.log('Real-time: New message received', p.new)
+        setMessages(prev => {
+          if (prev.some(m => m.id === p.new.id)) return prev
+          return [...prev, p.new as Message]
+        })
+      }
+    )
+    
+    channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel.id}` },
+      (p) => {
+        console.log('Real-time: Message updated', p.new)
+        setMessages(prev => prev.map(m => m.id === p.new.id ? p.new as Message : m))
+      }
+    )
+    
+    channel.subscribe((status) => {
+      console.log('Subscription status:', status)
+      if (status === 'SUBSCRIBED') {
+        console.log('Successfully subscribed to channel:', `chat:${activeChannel.id}`)
+      }
+    })
+    
+    // Poll every 3 seconds as fallback for real-time
+    const pollInterval = setInterval(async () => {
+      const { data } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('channel_id', activeChannel.id)
+        .order('created_at', { ascending: true })
+      if (data) {
+        setMessages(data as Message[])
+      }
+    }, 3000)
+    
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(pollInterval)
+    }
   }, [user, activeChannel.id])
 
   useEffect(() => {
