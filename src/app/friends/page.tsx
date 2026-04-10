@@ -60,17 +60,21 @@ export default function FriendsPage() {
   const handleSearch = async () => {
     if (!searchUsername.trim()) return
     setSearching(true)
-    const { data } = await supabase
+    console.log('Searching for:', searchUsername)
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, username')
       .eq('username', searchUsername)
       .single()
+    console.log('Search result:', data, 'error:', error)
     setSearchResult(data || null)
     setSearching(false)
   }
 
   const handleSendFriendRequest = async () => {
+    console.log('Sending friend request to:', searchUsername)
     const { error } = await sendFriendRequest(searchUsername)
+    console.log('Friend request result:', error)
     if (error) {
       alert(error.message)
     } else {
@@ -124,8 +128,8 @@ export default function FriendsPage() {
                 placeholder="Enter username..."
                 className="input text-sm flex-1"
               />
-              <button onClick={handleSearch} className="btn-primary text-sm">
-                Search
+              <button onClick={handleSearch} disabled={searching} className="btn-primary text-sm">
+                {searching ? '...' : 'Search'}
               </button>
             </div>
             {searchResult && (
