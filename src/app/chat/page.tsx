@@ -26,11 +26,15 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user) return
     const loadMessages = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .select('*')
         .eq('channel_id', activeChannel.id)
         .order('created_at', { ascending: true })
+      
+      if (error) {
+        console.error('Load messages error:', error.message)
+      }
       if (data) setMessages(data as Message[])
     }
     loadMessages()
@@ -38,7 +42,10 @@ export default function ChatPage() {
     const sub = supabase
       .channel(`chat:${activeChannel.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel.id}` },
-        (p) => setMessages(prev => [...prev, p.new as Message])
+        (p) => {
+          console.log('New message received:', p.new)
+          setMessages(prev => [...prev, p.new as Message])
+        }
       )
       .subscribe()
     return () => { supabase.removeChannel(sub) }
@@ -50,20 +57,43 @@ export default function ChatPage() {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user) return
-    const msg = {
-      channel_id: activeChannel.id,
-      content: newMessage,
-      sender_id: user.id,
-      sender_email: user.email,
-      sender_username: username || user.email?.split('@')[0] || 'user',
-      reply_to_id: replyingTo?.id || null,
-      reply_to_content: replyingTo?.content || null,
-      created_at: new Date().toISOString()
-    }
-    await supabase.from('messages').insert(msg)
-    setMessages(prev => [...prev, { ...msg, id: String(Date.now()) } as Message])
+    
+    const msgContent = newMessage
+    const msgUsername = username || user.email?.split('@')[0] || 'user'
+    const msgReplyToId = replyingTo?.id || null
+    const msgReplyToContent = replyingTo?.content || null
+    
     setNewMessage('')
     setReplyingTo(null)
+    
+    const { error } = await supabase.from('messages').insert({
+      channel_id: activeChannel.id,
+      content: msgContent,
+      sender_id: user.id,
+      sender_email: user.email,
+      sender_username: msgUsername,
+      reply_to_id: msgReplyToId,
+      reply_to_content: msgReplyToContent,
+      created_at: new Date().toISOString()
+    })
+    
+    if (error) {
+      console.error('Failed to send message:', error.message)
+      alert('Failed to send: ' + error.message)
+      return
+    }
+    
+    setMessages(prev => [...prev, {
+      id: String(Date.now()),
+      channel_id: activeChannel.id,
+      content: msgContent,
+      sender_id: user.id,
+      sender_email: user.email,
+      sender_username: msgUsername,
+      reply_to_id: msgReplyToId,
+      reply_to_content: msgReplyToContent,
+      created_at: new Date().toISOString()
+    } as Message])
   }
 
   const handleUpvote = async (msgId: string) => {
