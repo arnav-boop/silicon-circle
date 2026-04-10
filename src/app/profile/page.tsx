@@ -3,10 +3,12 @@
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase'
 
 export default function ProfilePage() {
   const { user, loading, username, updateUsername } = useAuth()
   const router = useRouter()
+  const supabase = createClient()
   const [bio, setBio] = useState('')
   const [interests, setInterests] = useState('')
   const [editingUsername, setEditingUsername] = useState(false)
@@ -38,9 +40,37 @@ export default function ProfilePage() {
   const handleSaveUsername = async () => {
     if (!newUsername.trim()) return
     setSaving(true)
-    await updateUsername(newUsername.trim())
+    const { error } = await updateUsername(newUsername.trim())
     setSaving(false)
-    setEditingUsername(false)
+    if (error) {
+      alert('Failed to update username: ' + error.message)
+    } else {
+      setEditingUsername(false)
+    }
+  }
+
+  const handleSaveBio = async () => {
+    setSaving(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ bio })
+      .eq('id', user.id)
+    setSaving(false)
+    if (error) {
+      alert('Failed to update bio: ' + error.message)
+    }
+  }
+
+  const handleSaveInterests = async () => {
+    setSaving(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ interests })
+      .eq('id', user.id)
+    setSaving(false)
+    if (error) {
+      alert('Failed to update interests: ' + error.message)
+    }
   }
 
   return (
