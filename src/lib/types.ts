@@ -53,8 +53,13 @@ export interface Message {
   content: string
   sender_id: string
   sender_email?: string
+  sender_username?: string
   sender?: Profile
   created_at: string
+  reply_to_id?: string | null
+  reply_to_content?: string | null
+  attachment_url?: string
+  upvote_count?: number
 }
 
 export const mockPosts: Post[] = [

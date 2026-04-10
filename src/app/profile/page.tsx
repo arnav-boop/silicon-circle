@@ -5,16 +5,23 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth()
+  const { user, loading, username, updateUsername } = useAuth()
   const router = useRouter()
   const [bio, setBio] = useState('')
   const [interests, setInterests] = useState('')
+  const [editingUsername, setEditingUsername] = useState(false)
+  const [newUsername, setNewUsername] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    if (username) setNewUsername(username)
+  }, [username])
 
   if (loading) {
     return (
@@ -28,6 +35,14 @@ export default function ProfilePage() {
     return null
   }
 
+  const handleSaveUsername = async () => {
+    if (!newUsername.trim()) return
+    setSaving(true)
+    await updateUsername(newUsername.trim())
+    setSaving(false)
+    setEditingUsername(false)
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
@@ -38,12 +53,45 @@ export default function ProfilePage() {
       <div className="card p-4 sm:p-6 space-y-4 sm:space-y-5">
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="w-12 sm:w-16 h-12 sm:h-16 border border-[var(--border)] flex items-center justify-center text-xl sm:text-2xl font-bold glow">
-            {user.email?.[0].toUpperCase()}
+            {username?.[0]?.toUpperCase() || user.email?.[0].toUpperCase()}
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold glow-subtle">
-              {user.email?.split('@')[0]}
-            </h2>
+          <div className="flex-1">
+            {editingUsername ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className="input text-sm py-1"
+                  placeholder="username"
+                />
+                <button 
+                  onClick={handleSaveUsername}
+                  disabled={saving}
+                  className="btn-primary text-sm py-1 px-2"
+                >
+                  {saving ? '...' : '✓'}
+                </button>
+                <button 
+                  onClick={() => setEditingUsername(false)}
+                  className="btn-secondary text-sm py-1 px-2"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold glow-subtle">
+                  @{username || user.email?.split('@')[0]}
+                </h2>
+                <button 
+                  onClick={() => setEditingUsername(true)}
+                  className="text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+                >
+                  edit
+                </button>
+              </div>
+            )}
             <p className="text-xs text-[var(--muted)]">{user.email}</p>
           </div>
         </div>
