@@ -19,7 +19,7 @@ export default function FriendsPage() {
   const supabase = createClient()
   
   const [searchUsername, setSearchUsername] = useState('')
-  const [searchResult, setSearchResult] = useState<any>(null)
+  const [searchResults, setSearchResults] = useState<any[]>([])
   const [searching, setSearching] = useState(false)
   const [activeChat, setActiveChat] = useState<any>(null)
   const [messages, setMessages] = useState<DirectMessage[]>([])
@@ -61,17 +61,19 @@ export default function FriendsPage() {
     if (!searchUsername.trim()) return
     setSearching(true)
     console.log('Searching for:', searchUsername)
+    // Use ILIKE for case-insensitive partial match
     const { data, error } = await supabase
       .from('profiles')
       .select('id, username')
-      .eq('username', searchUsername)
-      .single()
+      .ilike('username', `%${searchUsername}%`)
+      .limit(10)
     console.log('Search result:', data, 'error:', error)
-    setSearchResult(data || null)
+    setSearchResult(data && data.length > 0 ? data[0] : null)
     setSearching(false)
   }
 
   const handleSendFriendRequest = async () => {
+    if (!searchUsername.trim()) return
     console.log('Sending friend request to:', searchUsername)
     const { error } = await sendFriendRequest(searchUsername)
     console.log('Friend request result:', error)
@@ -79,8 +81,8 @@ export default function FriendsPage() {
       alert(error.message)
     } else {
       alert('Friend request sent!')
-      setSearchResult(null)
       setSearchUsername('')
+      setSearchResults([])
     }
   }
 
@@ -132,13 +134,31 @@ export default function FriendsPage() {
                 {searching ? '...' : 'Search'}
               </button>
             </div>
-            {searchResult && (
-              <div className="mt-3 p-2 border border-[var(--border)] rounded">
-                <p className="text-sm">Found: <span className="text-[var(--accent)] font-bold">@{searchResult.username}</span></p>
-                <button onClick={handleSendFriendRequest} className="btn-secondary text-sm mt-2 w-full">
-                  [ Send Friend Request ]
-                </button>
+            {searchResults.length > 0 && (
+              <div className="mt-3 p-2 border border-[var(--border)] rounded space-y-2">
+                {searchResults.map(result => (
+                  <div key={result.id} className="flex items-center justify-between">
+                    <span className="text-sm">@{result.username}</span>
+                    <button 
+                      onClick={() => {
+                        setSearchUsername(result.username)
+                        setSearchResults([])
+                      }} 
+                      className="btn-secondary text-xs py-1 px-2"
+                    >
+                      [Select]
+                    </button>
+                  </div>
+                ))}
               </div>
+            )}
+            {searchUsername && !searching && searchResults.length === 0 && (
+              <p className="text-sm text-[var(--muted)] mt-2">No users found</p>
+            )}
+            {searchUsername && !searching && (
+              <button onClick={handleSendFriendRequest} className="btn-secondary text-sm mt-2 w-full">
+                [ Send Friend Request ]
+              </button>
             )}
           </div>
 
