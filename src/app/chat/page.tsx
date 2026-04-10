@@ -1,15 +1,17 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { mockChannels, mockMessages, Message } from '@/lib/types'
+import { mockChannels, Message } from '@/lib/types'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 export default function ChatPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
+  const supabase = createClient()
   const [activeChannel, setActiveChannel] = useState(mockChannels[0])
-  const [messages, setMessages] = useState<Message[]>(mockMessages[activeChannel.id] || [])
+  const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -19,32 +21,59 @@ export default function ChatPage() {
     }
   }, [user, authLoading, router])
 
-  if (authLoading || !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="glow">{'>'} checking auth...</p>
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (!user) return
+
+    const channelMessages = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('channel_id', activeChannel.id)
+        .order('created_at', { ascending: true })
+
+      if (!error && data) {
+        setMessages(data as Message[])
+      }
+    }
+    channelMessages()
+
+    const subscription = supabase
+      .channel(`chat:${activeChannel.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${activeChannel.id}` }, 
+        (payload) => {
+          setMessages(prev => [...prev, payload.new as Message])
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
+  }, [user, activeChannel.id])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !user) return
     
-    const msg: Message = {
-      id: String(Date.now()),
+    const msg = {
       channel_id: activeChannel.id,
       content: newMessage,
-      sender_id: '1',
+      sender_id: user.id,
+      sender_email: user.email,
       created_at: new Date().toISOString()
     }
-    
-    setMessages([...messages, msg])
-    setNewMessage('')
+
+    const { error } = await supabase.from('messages').insert(msg)
+
+    if (!error) {
+      setNewMessage('')
+    }
   }
+
+  const username = user?.email?.split('@')[0] || 'user'
 
   const groupedChannels = mockChannels.reduce((acc, channel) => {
     if (!acc[channel.category]) {
@@ -66,10 +95,7 @@ export default function ChatPage() {
               {channels.map((channel) => (
                 <button
                   key={channel.id}
-                  onClick={() => {
-                    setActiveChannel(channel)
-                    setMessages(mockMessages[channel.id] || [])
-                  }}
+                  onClick={() => setActiveChannel(channel)}
                   className={`w-full text-left p-1.5 text-sm ${
                     activeChannel.id === channel.id
                       ? 'text-[var(--foreground)] glow-subtle'
@@ -96,13 +122,17 @@ export default function ChatPage() {
         </header>
 
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3">
-          {messages.map((msg) => (
-            <div key={msg.id} className="text-sm">
-              <span className="text-[var(--muted)]">[{new Date(msg.created_at).toLocaleTimeString()}]</span>
-              <span className="text-[var(--foreground-dim)] mx-1">user:</span>
-              <span className="text-[var(--foreground)]">{msg.content}</span>
-            </div>
-          ))}
+          {messages.length === 0 ? (
+            <p className="text-sm text-[var(--muted)]">No messages yet. Start the conversation!</p>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className="text-sm">
+                <span className="text-[var(--muted)]">[{new Date(msg.created_at).toLocaleTimeString()}]</span>
+                <span className="text-[var(--foreground-dim)] mx-1">{msg.sender_email?.split('@')[0] || 'user'}:</span>
+                <span className="text-[var(--foreground)]">{msg.content}</span>
+              </div>
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -114,7 +144,7 @@ export default function ChatPage() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="type message..."
+              placeholder={`Message as ${username}...`}
               className="input text-sm py-2"
             />
             <button onClick={handleSendMessage} className="btn-primary text-sm py-2 px-3 sm:px-4">

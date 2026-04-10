@@ -52,6 +52,7 @@ export interface Message {
   channel_id: string
   content: string
   sender_id: string
+  sender_email?: string
   sender?: Profile
   created_at: string
 }
