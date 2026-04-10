@@ -177,15 +177,17 @@ export default function ChatPage() {
   if (authLoading || !user) return <div className="flex items-center justify-center min-h-screen"><p className="glow">{'>'} checking auth...</p></div>
 
   return (
-    <div className="flex flex-col sm:flex-row h-[calc(100vh-60px)]">
+    <div className="flex flex-col sm:flex-row h-[calc(100vh-60px)] relative">
       {/* Mobile hamburger menu toggle */}
       <button 
-        className="sm:hidden absolute top-2 left-2 z-10 p-2"
+        className="sm:hidden absolute top-3 left-3 z-20 p-2 rounded border border-[var(--border)]"
         onClick={() => setShowChannels(!showChannels)}
-        style={{ color: 'var(--foreground)' }}
+        style={{ color: 'var(--foreground)', backgroundColor: 'var(--card-bg)' }}
       >
-        ☰
+        {showChannels ? '✕' : '☰'}
       </button>
+
+      <div className="sm:hidden h-12"></div>
 
       {/* Channels sidebar */}
       <aside className={`${showChannels ? 'flex' : 'hidden'} sm:flex w-full sm:w-56 border-r border-[var(--border)] bg-[var(--card-bg)] overflow-y-auto`}>

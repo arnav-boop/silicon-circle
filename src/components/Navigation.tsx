@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/feed', label: 'News' },
   { href: '/hackathons', label: 'Hacks' },
   { href: '/projects', label: 'Projects' },
+  { href: '/friends', label: 'Friends' },
   { href: '/chat', label: 'Chat' },
 ]
 
