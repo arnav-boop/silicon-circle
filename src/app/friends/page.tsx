@@ -67,8 +67,8 @@ export default function FriendsPage() {
       .select('id, username')
       .ilike('username', `%${searchUsername}%`)
       .limit(10)
-    console.log('Search result:', data, 'error:', error)
-    setSearchResult(data && data.length > 0 ? data[0] : null)
+    console.log('Search results:', data, 'error:', error)
+    setSearchResults(data || [])
     setSearching(false)
   }
 
