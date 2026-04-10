@@ -166,11 +166,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, username: string) => {
+    const emailRedirectTo = process.env.NEXT_PUBLIC_SITE_URL || 'https://silicon-circle.vercel.app'
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { username },
+        emailRedirectTo,
       },
     })
     if (!error && data.user) {
