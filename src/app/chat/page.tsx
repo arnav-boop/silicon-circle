@@ -15,6 +15,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('')
   const [showChannels, setShowChannels] = useState(false)
   const [replyingTo, setReplyingTo] = useState<Message | null>(null)
+  const [viewingReply, setViewingReply] = useState<Message | null>(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -221,10 +222,16 @@ export default function ChatPage() {
           ) : (
             messages.map(msg => (
               <div key={msg.id} className="border border-[var(--border)] rounded p-2 sm:p-3">
-                {msg.reply_to_content && (
-                  <div className="text-xs text-[var(--muted)] mb-1 pl-2 border-l-2 border-[var(--accent)]">
-                    ↩ Replying to: {msg.reply_to_content.slice(0, 50)}...
-                  </div>
+                {msg.reply_to_id && (
+                  <button 
+                    onClick={() => {
+                      const originalMsg = messages.find(m => m.id === msg.reply_to_id)
+                      if (originalMsg) setViewingReply(originalMsg)
+                    }}
+                    className="text-xs text-[var(--accent)] mb-1 pl-2 border-l-2 border-[var(--accent)] hover:underline text-left"
+                  >
+                    ↩ Replying to: {msg.reply_to_content?.slice(0, 50)}...
+                  </button>
                 )}
                 <div className="flex items-start gap-2">
                   <button 
@@ -290,6 +297,7 @@ export default function ChatPage() {
             <div className="flex gap-2 mt-2 flex-wrap">
               {['👍', '❤️', '😂', '😮', '😢', '🎉', '🔥', '👀'].map(emoji => (
                 <button 
+
                   key={emoji}
                   onClick={() => { setNewMessage(prev => prev + emoji); setShowEmojiPicker(false) }}
                   className="text-lg hover:scale-125 transition-transform"
@@ -300,6 +308,29 @@ export default function ChatPage() {
             </div>
           )}
         </div>
+
+        {/* Reply viewing modal */}
+        {viewingReply && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setViewingReply(null)}>
+            <div className="card p-4 max-w-md w-full" onClick={e => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-bold glow">Original Message</h3>
+                <button onClick={() => setViewingReply(null)} className="text-xl">✕</button>
+              </div>
+              <div className="text-sm mb-2">
+                <span className="text-[var(--muted)]">[{new Date(viewingReply.created_at).toLocaleTimeString()}]</span>
+                <span className="text-[var(--accent)] font-bold ml-2">{viewingReply.sender_username}</span>
+              </div>
+              <div className="text-[var(--foreground)]">{viewingReply.content}</div>
+              <button 
+                onClick={() => { setReplyingTo(viewingReply); setViewingReply(null) }}
+                className="btn-secondary text-sm mt-4 w-full"
+              >
+                [ Reply to this ]
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

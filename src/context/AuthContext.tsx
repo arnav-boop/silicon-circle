@@ -80,12 +80,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUsername = async (newUsername: string) => {
     if (!user) return { error: new Error('Not logged in') }
-    const { error } = await supabase
+    
+    // Update profile username
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ username: newUsername })
       .eq('id', user.id)
-    if (!error) setUsername(newUsername)
-    return { error }
+    
+    if (profileError) {
+      return { error: profileError }
+    }
+    
+    // Update all messages from this user
+    await supabase
+      .from('messages')
+      .update({ sender_username: newUsername })
+      .eq('sender_id', user.id)
+    
+    setUsername(newUsername)
+    return { error: null }
   }
 
   return (
