@@ -46,11 +46,9 @@ export default function CollabPage() {
           <h1 className="text-2xl sm:text-3xl font-bold glow">Collab Ideas_</h1>
           <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Share ideas, get feedback, build together</p>
         </div>
-        {user && (
-          <button onClick={() => setShowModal(true)} className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
-            [+ submit idea]
-          </button>
-        )}
+        <button onClick={() => setShowModal(true)} className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
+          [+ submit idea]
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

@@ -40,6 +40,12 @@ export default function ProjectsPage() {
         <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Built by the community</p>
       </div>
 
+      <div className="flex justify-end mb-4 sm:mb-6">
+        <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
+          [+ add project]
+        </button>
+      </div>
+
       <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setFilter('all')}
@@ -94,13 +100,11 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      {user && (
-        <div className="mt-6 sm:mt-8">
-          <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
-            [+ add project]
-          </button>
-        </div>
-      )}
+      <div className="mt-6 sm:mt-8">
+        <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
+          [+ add project]
+        </button>
+      </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
