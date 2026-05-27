@@ -1,17 +1,13 @@
 'use client'
 
 import { mockProjects } from '@/lib/types'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function ProjectsPage() {
   const { user } = useAuth()
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true)
   const [filter, setFilter] = useState('all')
-
-  useEffect(() => {
-    setVisible(true)
-  }, [])
 
   const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
   const filteredProjects = filter === 'all' 

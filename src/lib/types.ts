@@ -48,53 +48,14 @@ export interface Hackathon {
   title: string
   description: string
   date: string
+  theme?: string
+  tags?: string[]
   url?: string
   participants: number
   joined?: boolean
-}
-
-export interface Project {
-  id: string
-  title: string
-  description: string
-  tech: string[]
-  author: string
-  url?: string
-  likes: number
-  created_at: string
-}
-
-export interface Channel {
-  id: string
-  name: string
-  topic?: string
-  category: string
-  created_by: string
-}
-
-export interface Message {
-  id: string
-  channel_id: string
-  content: string
-  sender_id: string
-  sender_email?: string
-  sender_username?: string
-  sender?: Profile
-  created_at: string
-  reply_to_id?: string | null
-  reply_to_content?: string | null
-  attachment_url?: string
-  upvote_count?: number
-}
-
-export interface Hackathon {
-  id: string
-  title: string
-  description: string
-  date: string
-  url?: string
-  participants: number
-  joined?: boolean
+  generated?: boolean
+  organizer_id?: string
+  timezone?: string
 }
 
 export interface Project {
@@ -168,6 +129,8 @@ export const mockHackathons: Hackathon[] = [
     description: 'A 48-hour hackathon for teens worldwide. Build something awesome with AI, sustainability, or education theme.',
     date: '2024-02-15',
     participants: 156,
+    theme: 'innovation',
+    tags: ['AI', 'sustainability', 'education']
   },
   {
     id: '2',
@@ -175,6 +138,8 @@ export const mockHackathons: Hackathon[] = [
     description: 'Environmental hackathon focused on climate solutions. Create apps that help with sustainability and conservation.',
     date: '2024-03-01',
     participants: 89,
+    theme: 'environment',
+    tags: ['climate', 'sustainability', 'conservation']
   },
   {
     id: '3',
@@ -182,6 +147,8 @@ export const mockHackathons: Hackathon[] = [
     description: 'Build tools to improve education accessibility. For all ages and subjects.',
     date: '2024-03-20',
     participants: 234,
+    theme: 'education',
+    tags: ['edtech', 'accessibility', 'learning']
   }
 ]
 

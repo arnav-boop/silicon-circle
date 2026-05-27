@@ -1,15 +1,12 @@
 'use client'
 
 import { mockHackathons } from '@/lib/types'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
 
 export default function HackathonsPage() {
   const [hackathons, setHackathons] = useState(mockHackathons)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    setVisible(true)
-  }, [])
+  const [visible, setVisible] = useState(true)
 
   const toggleJoin = (id: string) => {
     setHackathons(hackathons.map(h => 
@@ -19,9 +16,14 @@ export default function HackathonsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-      <div className="mb-6 sm:mb-8">
-        <p className="text-xs text-[var(--muted)] mb-1">{'>'} hackathon_module</p>
-        <h1 className="text-2xl sm:text-3xl font-bold glow">Hackathons_</h1>
+      <div className="mb-6 sm:mb-8 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-[var(--muted)] mb-1">{'>'} hackathon_module</p>
+          <h1 className="text-2xl sm:text-3xl font-bold glow">Hackathons_</h1>
+        </div>
+        <Link href="/hackathons/host" className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
+          [+ host hackathon]
+        </Link>
       </div>
 
       <div className="space-y-4">

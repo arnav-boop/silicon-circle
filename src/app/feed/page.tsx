@@ -1,14 +1,10 @@
 'use client'
 
 import { mockPosts } from '@/lib/types'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export default function FeedPage() {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    setVisible(true)
-  }, [])
+  const [visible, setVisible] = useState(true)
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">

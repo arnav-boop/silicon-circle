@@ -1,0 +1,202 @@
+'use client'
+
+import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { mockHackathons } from '@/lib/types'
+import Link from 'next/link'
+
+const themes = [
+  { value: 'innovation', label: 'Innovation & Emerging Tech', icon: '🚀' },
+  { value: 'web3', label: 'Web3 & Blockchain', icon: '₿' },
+  { value: 'ai', label: 'AI & Machine Learning', icon: '🤖' },
+  { value: 'education', label: 'Education & Learning', icon: '📚' },
+  { value: 'social', label: 'Social Impact', icon: '🌍' },
+  { value: 'health', label: 'Health & Wellness', icon: '🏥' },
+  { value: 'finance', label: 'Finance & Fintech', icon: '💰' },
+  { value: 'gaming', label: 'Gaming & Entertainment', icon: '🎮' },
+  { value: 'environment', label: 'Environment & Sustainability', icon: '🌱' },
+  { value: 'open', label: 'Open Theme', icon: '🎨' },
+]
+
+export default function HostHackathonPage() {
+  const { user } = useAuth()
+  const [about, setAbout] = useState('')
+  const [theme, setTheme] = useState('')
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState('')
+  const [generatedInfo, setGeneratedInfo] = useState<{ description: string; tags: string[]; duration: string } | null>(null)
+
+  const generateHackathonInfo = () => {
+    if (!about.trim()) return
+
+    const keywords: Record<string, string[]> = {
+      'ai': ['AI', 'machine learning', 'neural networks', 'automation'],
+      'web3': ['blockchain', 'decentralized', 'smart contracts', 'cryptocurrency'],
+      'education': ['learning', 'education', 'students', 'teaching'],
+      'social': ['community', 'social impact', 'nonprofit', 'volunteer'],
+      'health': ['healthcare', 'medical', 'wellness', 'fitness'],
+      'finance': ['fintech', 'payments', 'banking', 'financial'],
+      'gaming': ['games', 'entertainment', 'interactive', 'fun'],
+      'environment': ['climate', 'sustainability', 'green tech', 'eco'],
+      'innovation': ['innovation', 'startup', 'tech', 'cutting-edge'],
+      'open': ['creativity', 'open', 'anything', 'build']
+    }
+
+    const selectedTheme = themes.find(t => t.value === theme)
+    const tags = keywords[theme] || ['innovation', 'coding', 'projects']
+
+    const description = `${selectedTheme?.label || 'Tech'} hackathon: ${about}. ` +
+      `Build amazing projects and collaborate with fellow developers. ` +
+      `Prizes, networking, and learning opportunities await!`
+
+    setGeneratedInfo({
+      description,
+      tags,
+      duration: '48 hours'
+    })
+
+    if (!title) {
+      const autoTitle = `Silicon Circle ${selectedTheme?.label || 'Hackathon'} 2024`
+      setTitle(autoTitle)
+    }
+  }
+
+  const handleCreate = () => {
+    if (!title || !date || !generatedInfo) return
+    alert(`Hackathon "${title}" created! (mock)`)
+    setAbout('')
+    setTheme('')
+    setTitle('')
+    setDate('')
+    setGeneratedInfo(null)
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="mb-4">
+          <Link href="/hackathons" className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
+            ← back to hackathons
+          </Link>
+        </div>
+        <div className="p-6 border border-[var(--border)] rounded text-center">
+          <p className="text-sm text-[var(--muted)] mb-4">Login to host hackathons</p>
+          <Link href="/login" className="btn-primary text-sm py-2 px-4 inline-block">[login to host]</Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <div className="mb-4">
+        <Link href="/hackathons" className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
+          ← back to hackathons
+        </Link>
+      </div>
+
+      <div className="mb-6 sm:mb-8">
+        <p className="text-xs text-[var(--muted)] mb-1">{'>'} host_hackathon_module</p>
+        <h1 className="text-2xl sm:text-3xl font-bold glow">Host Hackathon_</h1>
+        <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Create your own hackathon event</p>
+      </div>
+
+      <div className="space-y-6">
+        <div className="card p-4 sm:p-5">
+          <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-3">What is it about?</p>
+          <textarea
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+            placeholder="Describe what your hackathon focuses on, what problems participants will solve..."
+            className="input w-full h-24 resize-none"
+          />
+        </div>
+
+        <div className="card p-4 sm:p-5">
+          <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-3">Theme</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {themes.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setTheme(t.value)}
+                className={`p-3 border text-left transition-all ${
+                  theme === t.value
+                    ? 'border-[var(--foreground)] bg-[var(--foreground)]/10'
+                    : 'border-[var(--border)] hover:border-[var(--foreground-dim)]'
+                }`}
+              >
+                <span className="text-lg mr-2">{t.icon}</span>
+                <span className="text-xs">{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={generateHackathonInfo}
+          disabled={!about || !theme}
+          className="btn-primary w-full"
+        >
+          [generate hackathon info]
+        </button>
+
+        {generatedInfo && (
+          <div className="card p-4 sm:p-5 space-y-4">
+            <p className="text-xs text-[var(--muted)] uppercase tracking-wider">Generated Details</p>
+
+            <div>
+              <p className="text-xs text-[var(--muted)] mb-1">Title</p>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="input w-full"
+              />
+            </div>
+
+            <div>
+              <p className="text-xs text-[var(--muted)] mb-1">Date</p>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="input w-full"
+              />
+            </div>
+
+            <div>
+              <p className="text-xs text-[var(--muted)] mb-1">Description</p>
+              <p className="text-sm text-[var(--foreground-dim)] bg-[var(--card-bg)]/50 p-3 border border-[var(--border)]">
+                {generatedInfo.description}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs text-[var(--muted)] mb-2">Suggested Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {generatedInfo.tags.map(tag => (
+                  <span key={tag} className="text-xs border border-[var(--border)] px-2 py-1 text-[var(--muted)]">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs text-[var(--muted)] mb-1">Duration</p>
+              <p className="text-sm text-[var(--foreground-dim)]">{generatedInfo.duration}</p>
+            </div>
+
+            <button
+              onClick={handleCreate}
+              disabled={!title || !date}
+              className="btn-primary w-full"
+            >
+              [create hackathon]
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
