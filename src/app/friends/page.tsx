@@ -14,21 +14,23 @@ interface DirectMessage {
 }
 
 export default function FriendsPage() {
-  const { user, loading, friends, friendRequests, sendFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend } = useAuth()
+  const { user, loading, friends, friendRequests, sendFriendRequest, acceptFriendRequest, rejectFriendRequest } = useAuth()
   const router = useRouter()
   const supabase = createClient()
   
   const [searchUsername, setSearchUsername] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<{ id: string; username: string }[]>([])
   const [searching, setSearching] = useState(false)
-  const [activeChat, setActiveChat] = useState<any>(null)
+  const [activeChat, setActiveChat] = useState<{ id: string; username: string } | null>(null)
   const [messages, setMessages] = useState<DirectMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
 
+  type Friend = { id: string; username: string | null }
+  
   useEffect(() => {
     if (!loading && !user) router.push('/login')
   }, [user, loading, router])
-
+  
   useEffect(() => {
     if (!user || !activeChat) return
     
@@ -42,10 +44,10 @@ export default function FriendsPage() {
       if (data) setMessages(data as DirectMessage[])
     }
     loadDMs()
-
+    
     const channel = supabase.channel(`dm:${activeChat.id}`)
     channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' },
-      (p: any) => {
+      (p) => {
         const msg = p.new as DirectMessage
         if ((msg.sender_id === user.id && msg.receiver_id === activeChat.id) ||
             (msg.receiver_id === user.id && msg.sender_id === activeChat.id)) {
@@ -53,9 +55,9 @@ export default function FriendsPage() {
         }
       }
     ).subscribe()
-
+    
     return () => { supabase.removeChannel(channel) }
-  }, [user, activeChat])
+  }, [user, activeChat, supabase])
 
   const handleSearch = async () => {
     if (!searchUsername.trim()) return
@@ -187,10 +189,10 @@ export default function FriendsPage() {
               friends.map(friend => (
                 <button
                   key={friend.id}
-                  onClick={() => setActiveChat(friend)}
+                  onClick={() => setActiveChat({ id: friend.id, username: friend.username || 'unknown' })}
                   className={`w-full text-left py-2 border-b border-[var(--border)] hover:bg-[var(--border)] ${activeChat?.id === friend.id ? 'bg-[var(--border)]' : ''}`}
                 >
-                  @{friend.username}
+                  @{friend.username || 'unknown'}
                 </button>
               ))
             )}
