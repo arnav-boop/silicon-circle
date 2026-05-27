@@ -17,14 +17,17 @@ export default function ProjectsPage() {
   const { user } = useAuth()
   const [visible, setVisible] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '', image: null })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
-  const filteredProjects = filter === 'all'
-    ? mockProjects
-    : mockProjects.filter(p => p.tech.includes(filter))
+  const filteredProjects = mockProjects.filter(p => {
+    const techMatch = filter === 'all' || p.tech.includes(filter)
+    const searchMatch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase())
+    return techMatch && searchMatch
+  })
 
   const handleSubmit = () => {
     if (form.title && form.description) {
@@ -46,6 +49,16 @@ export default function ProjectsPage() {
         <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
           [+ add project]
         </button>
+      </div>
+
+      <div className="mb-4 sm:mb-6">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search projects..."
+          className="input w-full max-w-sm"
+        />
       </div>
 
       <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
