@@ -18,6 +18,75 @@ export interface Post {
   created_at: string
 }
 
+export interface Idea {
+  id: string
+  title: string
+  description: string
+  problem: string
+  solution: string
+  sketch_url?: string
+  author_id: string
+  author?: Profile
+  upvotes: number
+  created_at: string
+}
+
+export interface IdeaComment {
+  id: string
+  idea_id: string
+  content: string
+  author_id: string
+  author?: Profile
+  parent_id?: string | null
+  upvotes: number
+  created_at: string
+  attachment_url?: string
+}
+
+export interface Hackathon {
+  id: string
+  title: string
+  description: string
+  date: string
+  url?: string
+  participants: number
+  joined?: boolean
+}
+
+export interface Project {
+  id: string
+  title: string
+  description: string
+  tech: string[]
+  author: string
+  url?: string
+  likes: number
+  created_at: string
+}
+
+export interface Channel {
+  id: string
+  name: string
+  topic?: string
+  category: string
+  created_by: string
+}
+
+export interface Message {
+  id: string
+  channel_id: string
+  content: string
+  sender_id: string
+  sender_email?: string
+  sender_username?: string
+  sender?: Profile
+  created_at: string
+  reply_to_id?: string | null
+  reply_to_content?: string | null
+  attachment_url?: string
+  upvote_count?: number
+}
+
 export interface Hackathon {
   id: string
   title: string
@@ -181,3 +250,125 @@ export const mockProjects: Project[] = [
     created_at: '2024-01-01T08:00:00Z'
   }
 ]
+
+export const mockIdeas: Idea[] = [
+  {
+    id: '1',
+    title: 'Collaborative Code Editor',
+    description: 'Real-time collaborative code editor with video chat and voice commentary',
+    problem: 'Remote teams struggle to pair program effectively. Existing solutions lack integrated communication features.',
+    solution: 'Web-based Monaco editor with WebRTC video/audio, cursor tracking, and voice notes that can be left at specific code locations.',
+    sketch_url: '/sketch-1.svg',
+    author_id: '1',
+    author: { id: '1', username: 'code_wizard', created_at: '2024-01-13T09:00:00Z' },
+    upvotes: 42,
+    created_at: '2024-01-15T10:00:00Z'
+  },
+  {
+    id: '2',
+    title: 'AI-Powered Study Buddy',
+    description: 'Personalized learning assistant that adapts to your study style',
+    problem: 'Students waste time on ineffective study methods. One-size-fits-all approaches don\'t work for different learning styles.',
+    solution: 'ML algorithm analyzes your learning patterns and generates custom quizzes, flashcards, and explanations tailored to how you learn best.',
+    sketch_url: '/sketch-2.svg',
+    author_id: '2',
+    author: { id: '2', username: 'web_dev_king', created_at: '2024-01-12T10:00:00Z' },
+    upvotes: 38,
+    created_at: '2024-01-14T15:30:00Z'
+  },
+  {
+    id: '3',
+    title: 'Green Code Scanner',
+    description: 'Tool that measures and suggests optimizations for code carbon footprint',
+    problem: 'Developers don\'t consider environmental impact of inefficient code. No tools exist to measure code\'s energy consumption.',
+    solution: 'Static analysis tool that estimates energy usage of algorithms and suggests optimizations, with gamification to encourage efficient code.',
+    sketch_url: '/sketch-3.svg',
+    author_id: '1',
+    author: { id: '1', username: 'code_wizard', created_at: '2024-01-13T09:00:00Z' },
+    upvotes: 56,
+    created_at: '2024-01-13T09:00:00Z'
+  },
+  {
+    id: '4',
+    title: 'AR Debugging Assistant',
+    description: 'Augmented reality overlay that visualizes code execution in 3D space',
+    problem: 'Debugging complex systems is mentally taxing. Traditional debuggers show linear data that\'s hard to visualize.',
+    solution: 'AR glasses or phone camera shows data structures and code flow as 3D objects you can walk around and interact with.',
+    sketch_url: '/sketch-4.svg',
+    author_id: '3',
+    author: { id: '3', username: 'ai_enthusiast', created_at: '2024-01-11T14:00:00Z' },
+    upvotes: 31,
+    created_at: '2024-01-12T14:00:00Z'
+  },
+  {
+    id: '5',
+    title: 'Podcast to Blog Converter',
+    description: 'AI that transforms technical podcasts into searchable, structured documentation',
+    problem: 'Great technical content exists only in audio form, making it hard to reference or search later.',
+    solution: 'Transcribe podcasts, extract key concepts, code snippets, and create markdown/blog posts with proper formatting and links.',
+    sketch_url: '/sketch-5.svg',
+    author_id: '2',
+    author: { id: '2', username: 'web_dev_king', created_at: '2024-01-12T10:00:00Z' },
+    upvotes: 45,
+    created_at: '2024-01-11T11:30:00Z'
+  },
+  {
+    id: '6',
+    title: 'Open Source Resume Builder',
+    description: 'Community-driven project that builds resumes from your GitHub activity',
+    problem: 'Traditional resumes don\'t showcase actual coding ability. GitHub profiles are too raw for recruiters.',
+    solution: 'Analyze commit history, PRs, projects, and automatically generate visually appealing resumes with skill metrics and project highlights.',
+    sketch_url: '/sketch-6.svg',
+    author_id: '1',
+    author: { id: '1', username: 'code_wizard', created_at: '2024-01-13T09:00:00Z' },
+    upvotes: 67,
+    created_at: '2024-01-10T08:45:00Z'
+  }
+]
+
+export const mockIdeaComments: Record<string, IdeaComment[]> = {
+  '1': [
+    {
+      id: 'c1',
+      idea_id: '1',
+      content: 'This would be amazing for hackathons! Could you add shared terminals too?',
+      author_id: '2',
+      author: { id: '2', username: 'web_dev_king', created_at: '2024-01-14T10:00:00Z' },
+      parent_id: null,
+      upvotes: 12,
+      created_at: '2024-01-15T11:00:00Z'
+    },
+    {
+      id: 'c2',
+      idea_id: '1',
+      content: 'Shared terminals would be cool but security is tricky. Maybe use Docker containers per user?',
+      author_id: '1',
+      author: { id: '1', username: 'code_wizard', created_at: '2024-01-13T09:00:00Z' },
+      parent_id: 'c1',
+      upvotes: 8,
+      created_at: '2024-01-15T11:30:00Z'
+    },
+    {
+      id: 'c3',
+      idea_id: '1',
+      content: 'What about syntax highlighting for 20+ languages out of the box?',
+      author_id: '3',
+      author: { id: '3', username: 'ai_enthusiast', created_at: '2024-01-12T14:00:00Z' },
+      parent_id: null,
+      upvotes: 5,
+      created_at: '2024-01-15T12:00:00Z'
+    }
+  ],
+  '2': [
+    {
+      id: 'c4',
+      idea_id: '2',
+      content: 'How does it handle visual learners who need diagrams?',
+      author_id: '1',
+      author: { id: '1', username: 'code_wizard', created_at: '2024-01-13T09:00:00Z' },
+      parent_id: null,
+      upvotes: 15,
+      created_at: '2024-01-14T16:00:00Z'
+    }
+  ]
+}
