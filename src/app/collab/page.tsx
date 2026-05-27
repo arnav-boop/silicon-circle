@@ -1,7 +1,7 @@
 'use client'
 
 import { mockIdeas, mockIdeaComments } from '@/lib/types'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
@@ -10,13 +10,15 @@ interface IdeaForm {
   description: string
   problem: string
   solution: string
+  image: File | null
 }
 
 export default function CollabPage() {
   const { user } = useAuth()
   const [visible, setVisible] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState<IdeaForm>({ title: '', description: '', problem: '', solution: '' })
+  const [form, setForm] = useState<IdeaForm>({ title: '', description: '', problem: '', solution: '', image: null })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -155,13 +157,30 @@ export default function CollabPage() {
 
               <div>
                 <p className="text-xs text-[var(--muted)] mb-1">Solution</p>
-                <textarea
-                  value={form.solution}
-                  onChange={(e) => setForm({ ...form, solution: e.target.value })}
-                  placeholder="How would you solve it?"
-                  className="input w-full h-24 resize-none"
-                />
+<textarea
+                   value={form.solution}
+                   onChange={(e) => setForm({ ...form, solution: e.target.value })}
+                   placeholder="How would you solve it?"
+                   className="input w-full h-24 resize-none"
+                 />
               </div>
+
+              <div>
+                 <p className="text-xs text-[var(--muted)] mb-1">Sketch/Draft (optional)</p>
+                 <input
+                   type="file"
+                   ref={fileInputRef}
+                   onChange={(e) => setForm({ ...form, image: e.target.files?.[0] || null })}
+                   accept="image/*"
+                   className="hidden"
+                 />
+                 <button
+                   onClick={() => fileInputRef.current?.click()}
+                   className="btn-secondary text-sm py-2 px-4 w-full"
+                 >
+                   {form.image ? `[selected: ${form.image.name}]` : '[add sketch or draft]'}
+                 </button>
+               </div>
 
               <div className="flex gap-2 pt-4">
                 <button onClick={handleSubmit} className="btn-primary flex-1">

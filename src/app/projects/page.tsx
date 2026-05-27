@@ -1,7 +1,7 @@
 'use client'
 
 import { mockProjects } from '@/lib/types'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
@@ -10,6 +10,7 @@ interface ProjectForm {
   description: string
   tech: string
   url: string
+  image: File | null
 }
 
 export default function ProjectsPage() {
@@ -17,7 +18,8 @@ export default function ProjectsPage() {
   const [visible, setVisible] = useState(true)
   const [filter, setFilter] = useState('all')
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '' })
+  const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '', image: null })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
   const filteredProjects = filter === 'all'
@@ -27,7 +29,7 @@ export default function ProjectsPage() {
   const handleSubmit = () => {
     if (form.title && form.description) {
       alert(`Project "${form.title}" uploaded! (mock)`)
-      setForm({ title: '', description: '', tech: '', url: '' })
+      setForm({ title: '', description: '', tech: '', url: '', image: null })
       setShowModal(false)
     }
   }
