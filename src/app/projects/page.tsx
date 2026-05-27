@@ -3,16 +3,34 @@
 import { mockProjects } from '@/lib/types'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import Link from 'next/link'
+
+interface ProjectForm {
+  title: string
+  description: string
+  tech: string
+  url: string
+}
 
 export default function ProjectsPage() {
   const { user } = useAuth()
   const [visible, setVisible] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '' })
 
   const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
-  const filteredProjects = filter === 'all' 
-    ? mockProjects 
+  const filteredProjects = filter === 'all'
+    ? mockProjects
     : mockProjects.filter(p => p.tech.includes(filter))
+
+  const handleSubmit = () => {
+    if (form.title && form.description) {
+      alert(`Project "${form.title}" uploaded! (mock)`)
+      setForm({ title: '', description: '', tech: '', url: '' })
+      setShowModal(false)
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
@@ -78,9 +96,76 @@ export default function ProjectsPage() {
 
       {user && (
         <div className="mt-6 sm:mt-8">
-          <button className="btn-primary text-base py-3 px-6">
+          <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
             [+ add project]
           </button>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="card p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-bold glow">Upload Project_</h2>
+              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)]">
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Title</p>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="My awesome app..."
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Description</p>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="What does it do?"
+                  className="input w-full h-24 resize-none"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Tech Stack</p>
+                <input
+                  type="text"
+                  value={form.tech}
+                  onChange={(e) => setForm({ ...form, tech: e.target.value })}
+                  placeholder="React, Next.js, etc..."
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">URL (optional)</p>
+                <input
+                  type="url"
+                  value={form.url}
+                  onChange={(e) => setForm({ ...form, url: e.target.value })}
+                  placeholder="https://..."
+                  className="input w-full"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button onClick={handleSubmit} className="btn-primary flex-1">
+                  [upload project]
+                </button>
+                <button onClick={() => setShowModal(false)} className="btn-secondary px-4">
+                  [cancel]
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

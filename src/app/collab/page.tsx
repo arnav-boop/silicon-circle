@@ -5,9 +5,18 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
+interface IdeaForm {
+  title: string
+  description: string
+  problem: string
+  solution: string
+}
+
 export default function CollabPage() {
   const { user } = useAuth()
   const [visible, setVisible] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm] = useState<IdeaForm>({ title: '', description: '', problem: '', solution: '' })
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -21,6 +30,14 @@ export default function CollabPage() {
     return comments.length + comments.reduce((acc, c) => acc + (mockIdeaComments[c.id]?.length || 0), 0)
   }
 
+  const handleSubmit = () => {
+    if (form.title && form.description && form.problem && form.solution) {
+      alert(`Idea "${form.title}" shared! (mock)`)
+      setForm({ title: '', description: '', problem: '', solution: '' })
+      setShowModal(false)
+    }
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex items-center justify-between">
@@ -30,7 +47,7 @@ export default function CollabPage() {
           <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Share ideas, get feedback, build together</p>
         </div>
         {user && (
-          <button className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
+          <button onClick={() => setShowModal(true)} className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
             [+ submit idea]
           </button>
         )}
@@ -92,6 +109,72 @@ export default function CollabPage() {
           <Link href="/login" className="btn-primary text-sm py-2 px-4">
             [login to participate]
           </Link>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="card p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-bold glow">Share Idea_</h2>
+              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)]">
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Title (one-liner)</p>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="What's your idea called?"
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">One-sentence description</p>
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Summarize in one sentence..."
+                  className="input w-full"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Problem</p>
+                <textarea
+                  value={form.problem}
+                  onChange={(e) => setForm({ ...form, problem: e.target.value })}
+                  placeholder="What problem does it solve?"
+                  className="input w-full h-20 resize-none"
+                />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Solution</p>
+                <textarea
+                  value={form.solution}
+                  onChange={(e) => setForm({ ...form, solution: e.target.value })}
+                  placeholder="How would you solve it?"
+                  className="input w-full h-24 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <button onClick={handleSubmit} className="btn-primary flex-1">
+                  [share idea]
+                </button>
+                <button onClick={() => setShowModal(false)} className="btn-secondary px-4">
+                  [cancel]
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
