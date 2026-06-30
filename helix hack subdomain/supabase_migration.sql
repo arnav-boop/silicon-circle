@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS teams (
   school TEXT NOT NULL,
   leader_name TEXT NOT NULL,
   leader_email TEXT NOT NULL,
+  leader_phone TEXT NOT NULL DEFAULT '',
   members JSONB DEFAULT '[]'::jsonb,
   submissions JSONB DEFAULT '{}'::jsonb,
   status TEXT NOT NULL DEFAULT 'registered' CHECK (status IN ('registered', 'submitted', 'finalist', 'fellow', 'disqualified')),

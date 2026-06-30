@@ -2,14 +2,14 @@
 
 :root {
   --background: #000000;
-  --foreground: #00ff41;
-  --foreground-dim: #00aa2c;
+  --foreground: #22c55e;
+  --foreground-dim: #16a34a;
   --card-bg: #0a0a0a;
-  --border: #003b00;
-  --muted: #006600;
-  --accent: #00ff41;
-  --cursor-blink: #00ff41;
-  --font-size-body: 28px;
+  --border: #14532d;
+  --muted: #15803d;
+  --accent: #22c55e;
+  --cursor-blink: #22c55e;
+  --font-size-body: 16px;
   --font-size-button: 16px;
   --font-size-input: 16px;
 }

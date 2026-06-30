@@ -20,6 +20,7 @@ const GOOGLE_FORM_CONFIG = {
     theme: 'entry.584403977',       // Replace with your Form's Theme field entry ID
     leaderName: 'entry.1950474762',  // Replace with your Form's Leader Name field entry ID
     leaderEmail: 'entry.399403490', // Replace with your Form's Leader Email field entry ID
+    leaderPhone: 'entry.419928691',   // Replace with your Form's Leader Phone field entry ID (e.g. entry.123456789)
     members: 'entry.307412346'      // Replace with your Form's Members list field entry ID
   }
 };
@@ -129,6 +130,7 @@ class HelixSupabase {
         school: teamData.school,
         leader_name: teamData.leaderName,
         leader_email: teamData.leaderEmail,
+        leader_phone: teamData.leaderPhone || '',
         members: teamData.members,
         submissions: {},
         status: 'registered',
@@ -145,20 +147,34 @@ class HelixSupabase {
     // Mirror to Google Form in the background if configured
     try {
       if (GOOGLE_FORM_CONFIG.url && !GOOGLE_FORM_CONFIG.url.includes('1FAIpQLSfXXXXXXXXXXXXX')) {
-        const formData = new FormData();
-        formData.append(GOOGLE_FORM_CONFIG.entries.teamId, uniqueId);
-        formData.append(GOOGLE_FORM_CONFIG.entries.teamName, teamData.name);
-        formData.append(GOOGLE_FORM_CONFIG.entries.school, teamData.school);
-        formData.append(GOOGLE_FORM_CONFIG.entries.category, teamData.category);
-        formData.append(GOOGLE_FORM_CONFIG.entries.theme, teamData.theme);
-        formData.append(GOOGLE_FORM_CONFIG.entries.leaderName, teamData.leaderName);
-        formData.append(GOOGLE_FORM_CONFIG.entries.leaderEmail, teamData.leaderEmail);
-        formData.append(GOOGLE_FORM_CONFIG.entries.members, (teamData.members || []).join(', '));
+        // Google Forms requires application/x-www-form-urlencoded, not multipart/form-data
+        const formParams = new URLSearchParams();
+        formParams.append(GOOGLE_FORM_CONFIG.entries.teamId, uniqueId);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.teamName, teamData.name);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.school, teamData.school);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.category, teamData.category);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.theme, teamData.theme);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderName, teamData.leaderName);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderEmail, teamData.leaderEmail);
+        if (GOOGLE_FORM_CONFIG.entries.leaderPhone && !GOOGLE_FORM_CONFIG.entries.leaderPhone.includes('XXXXXXX')) {
+          formParams.append(GOOGLE_FORM_CONFIG.entries.leaderPhone, teamData.leaderPhone);
+        }
+
+        // Handle both simple string arrays and object arrays for members safely
+        const membersStr = (teamData.members || []).map(m => {
+          if (typeof m === 'object' && m !== null) {
+            return `${m.name} (${m.email || 'No email'}${m.phone ? `, ${m.phone}` : ''})`;
+          }
+          return m;
+        }).join(', ');
+
+        formParams.append(GOOGLE_FORM_CONFIG.entries.members, membersStr);
 
         fetch(GOOGLE_FORM_CONFIG.url, {
           method: 'POST',
           mode: 'no-cors',
-          body: formData
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formParams.toString()
         }).catch(err => console.warn('Google Form submission network error:', err));
       }
     } catch (err) {

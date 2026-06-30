@@ -1,101 +1,124 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { createClient } from '@/lib/supabase'
 import type { IdeaComment } from '@/lib/types'
-import Image from 'next/image'
 
 interface CommentSectionProps {
   ideaId: string
-  comments: IdeaComment[]
 }
 
 interface CommentProps {
-  comment: IdeaComment
-  replies: IdeaComment[]
+  comment: any
+  replies: any[]
   onReply: (parentId: string) => void
   onUpvote: (commentId: string) => void
   replyingTo: string | null
   replyContent: string
   setReplyContent: (content: string) => void
-  replyAttachment: File | null
-  setReplyAttachment: (file: File | null) => void
   onSubmitReply: (parentId: string) => void
-  fileInputRef: React.RefObject<HTMLInputElement | null>
   user: { id: string } | null
 }
 
-export default function CommentSection({ ideaId, comments }: CommentSectionProps) {
+export default function CommentSection({ ideaId }: CommentSectionProps) {
   const { user } = useAuth()
-  const [allComments, setAllComments] = useState<IdeaComment[]>(comments)
+  const supabase = createClient()
+  const [allComments, setAllComments] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
-  const [replyAttachment, setReplyAttachment] = useState<File | null>(null)
   const [mainComment, setMainComment] = useState('')
-  const [mainAttachment, setMainAttachment] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const replyFileInputRef = useRef<HTMLInputElement>(null)
+
+  const fetchComments = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('idea_comments')
+      .select('*, author:profiles(username)')
+      .eq('idea_id', ideaId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching comments:', error.message)
+    } else if (data) {
+      setAllComments(data)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchComments()
+  }, [ideaId])
 
   const topLevelComments = allComments.filter(c => !c.parent_id)
   const replies = allComments.filter(c => c.parent_id)
 
-  const handleMainSubmit = () => {
+  const handleMainSubmit = async () => {
     if (!user || !mainComment.trim()) return
 
-    const attachmentUrl = mainAttachment ? URL.createObjectURL(mainAttachment) : undefined
-
-    const newComment: IdeaComment & { attachment_url?: string } = {
-      id: `new-${Date.now()}`,
+    const { error } = await supabase.from('idea_comments').insert({
       idea_id: ideaId,
-      content: mainComment,
+      content: mainComment.trim(),
       author_id: user.id,
-      author: { id: user.id, username: user.user_metadata?.username || user.email?.split('@')[0] || 'user', created_at: new Date().toISOString() },
       parent_id: null,
       upvotes: 0,
-      created_at: new Date().toISOString(),
-      ...(attachmentUrl && { attachment_url: attachmentUrl })
-    }
+      created_at: new Date().toISOString()
+    })
 
-    setAllComments(prev => [newComment, ...prev])
-    setMainComment('')
-    setMainAttachment(null)
+    if (error) {
+      alert('Error sharing comment: ' + error.message)
+    } else {
+      setMainComment('')
+      fetchComments()
+    }
   }
 
   const handleReply = (parentId: string) => {
     if (!user) return
     setReplyingTo(replyingTo === parentId ? null : parentId)
     setReplyContent('')
-    setReplyAttachment(null)
   }
 
-  const handleReplySubmit = (parentId: string) => {
+  const handleReplySubmit = async (parentId: string) => {
     if (!user || !replyContent.trim()) return
 
-    const attachmentUrl = replyAttachment ? URL.createObjectURL(replyAttachment) : undefined
-
-    const newComment: IdeaComment & { attachment_url?: string } = {
-      id: `new-${Date.now()}`,
+    const { error } = await supabase.from('idea_comments').insert({
       idea_id: ideaId,
-      content: replyContent,
+      content: replyContent.trim(),
       author_id: user.id,
-      author: { id: user.id, username: user.user_metadata?.username || user.email?.split('@')[0] || 'user', created_at: new Date().toISOString() },
       parent_id: parentId,
       upvotes: 0,
-      created_at: new Date().toISOString(),
-      ...(attachmentUrl && { attachment_url: attachmentUrl })
-    }
+      created_at: new Date().toISOString()
+    })
 
-    setAllComments(prev => [...prev, newComment])
-    setReplyContent('')
-    setReplyAttachment(null)
-    setReplyingTo(null)
+    if (error) {
+      alert('Error replying: ' + error.message)
+    } else {
+      setReplyContent('')
+      setReplyingTo(null)
+      fetchComments()
+    }
   }
 
-  const handleUpvote = (commentId: string) => {
+  const handleUpvote = async (commentId: string) => {
     if (!user) return
-    setAllComments(prev => prev.map(c =>
-      c.id === commentId ? { ...c, upvotes: c.upvotes + 1 } : c
-    ))
+    const target = allComments.find(c => c.id === commentId)
+    const newUpvotes = (target?.upvotes || 0) + 1
+    
+    const { error } = await supabase
+      .from('idea_comments')
+      .update({ upvotes: newUpvotes })
+      .eq('id', commentId)
+
+    if (!error) {
+      setAllComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, upvotes: newUpvotes } : c
+      ))
+    }
+  }
+
+  if (loading) {
+    return <p className="text-xs text-[var(--muted)]">{'>'} loading comments...</p>
   }
 
   return (
@@ -114,22 +137,6 @@ export default function CommentSection({ ideaId, comments }: CommentSectionProps
               placeholder="Share your thoughts or suggestions..."
               className="input flex-1"
             />
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => setMainAttachment(e.target.files?.[0] || null)}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="btn-secondary py-2 px-3"
-              title="Add image"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </button>
             <button
               onClick={handleMainSubmit}
               disabled={!mainComment.trim()}
@@ -138,11 +145,6 @@ export default function CommentSection({ ideaId, comments }: CommentSectionProps
               [post]
             </button>
           </div>
-          {mainAttachment && (
-            <p className="text-xs text-[var(--muted)] mb-2">
-              Image selected: {mainAttachment.name}
-            </p>
-          )}
         </div>
       )}
 
@@ -157,10 +159,7 @@ export default function CommentSection({ ideaId, comments }: CommentSectionProps
             replyingTo={replyingTo}
             replyContent={replyContent}
             setReplyContent={setReplyContent}
-            replyAttachment={replyAttachment}
-            setReplyAttachment={setReplyAttachment}
             onSubmitReply={handleReplySubmit}
-            fileInputRef={replyFileInputRef}
             user={user}
           />
         ))}
@@ -183,21 +182,13 @@ function Comment({
   replyingTo,
   replyContent,
   setReplyContent,
-  replyAttachment,
-  setReplyAttachment,
   onSubmitReply,
-  fileInputRef,
   user
 }: CommentProps) {
-  const [localUpvotes, setLocalUpvotes] = useState(comment.upvotes)
-
   const handleUpvote = () => {
     if (!user) return
-    setLocalUpvotes(prev => prev + 1)
     onUpvote(comment.id)
   }
-
-  const commentWithAttachment = comment as IdeaComment & { attachment_url?: string }
 
   return (
     <div className="border-b border-[var(--border)] pb-4 last:border-0">
@@ -224,18 +215,7 @@ function Comment({
           <p className="text-sm text-[var(--foreground-dim)] mb-2">
             {comment.content}
           </p>
-          {commentWithAttachment.attachment_url && (
-            <div className="mb-2 border border-[var(--border)] rounded p-2 bg-[var(--card-bg)]/50 max-w-sm">
-              <Image
-                src={commentWithAttachment.attachment_url}
-                alt="Attachment"
-                width={200}
-                height={200}
-                className="max-w-full rounded"
-                unoptimized
-              />
-            </div>
-          )}
+          
           <div className="flex items-center gap-4">
             <button
               onClick={handleUpvote}
@@ -247,7 +227,7 @@ function Comment({
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
               </svg>
-              {localUpvotes}
+              {comment.upvotes || 0}
             </button>
             {user && (
               <button
@@ -269,22 +249,6 @@ function Comment({
                 className="input text-sm flex-1"
                 autoFocus
               />
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={(e) => setReplyAttachment(e.target.files?.[0] || null)}
-                accept="image/*"
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="btn-secondary py-1.5 px-3"
-                title="Add image"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </button>
               <button
                 onClick={() => onSubmitReply(comment.id)}
                 className="btn-primary text-sm py-1.5 px-3"
@@ -300,16 +264,9 @@ function Comment({
             </div>
           )}
 
-          {replyAttachment && replyingTo === comment.id && (
-            <p className="text-xs text-[var(--muted)] mt-2 mb-2">
-              Image selected: {replyAttachment.name}
-            </p>
-          )}
-
           {replies.length > 0 && (
             <div className="mt-3 ml-4 sm:ml-6 border-l-2 border-[var(--border)] pl-3 sm:pl-4 space-y-3">
               {replies.map((reply) => {
-                const replyWithAttachment = reply as IdeaComment & { attachment_url?: string }
                 return (
                   <div key={reply.id} className="text-sm">
                     <div className="flex items-center gap-2 mb-1">
@@ -326,18 +283,6 @@ function Comment({
                     <p className="text-[var(--foreground-dim)] text-xs sm:text-sm">
                       {reply.content}
                     </p>
-                    {replyWithAttachment.attachment_url && (
-                      <div className="mt-2 border border-[var(--border)] rounded p-2 bg-[var(--card-bg)]/50 max-w-sm">
-                        <Image
-                          src={replyWithAttachment.attachment_url}
-                          alt="Attachment"
-                          width={200}
-                          height={200}
-                          className="max-w-full rounded"
-                          unoptimized
-                        />
-                      </div>
-                    )}
                   </div>
                 )
               })}

@@ -2,38 +2,76 @@
 
 import { useState, useEffect, use } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { mockIdeas, mockIdeaComments } from '@/lib/types'
+import { createClient } from '@/lib/supabase'
 import CommentSection from '@/components/CommentSection'
 import Link from 'next/link'
 
 export default function IdeaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
   const { user } = useAuth()
+  const supabase = createClient()
+  const [idea, setIdea] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [visible, setVisible] = useState(false)
   const [upvoted, setUpvoted] = useState(false)
   const [upvotes, setUpvotes] = useState(0)
 
-  const idea = mockIdeas.find(i => i.id === resolvedParams.id)
+  const fetchIdea = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('ideas')
+      .select('*, author:profiles(username)')
+      .eq('id', resolvedParams.id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching idea:', error.message)
+    } else if (data) {
+      setIdea(data)
+      setUpvotes(data.upvotes || 0)
+    }
+    setLoading(false)
+  }
 
   useEffect(() => {
+    fetchIdea()
     const raf = requestAnimationFrame(() => {
       setVisible(true)
-      if (idea) {
-        setUpvotes(idea.upvotes)
-      }
     })
     return () => cancelAnimationFrame(raf)
-  }, [idea])
+  }, [resolvedParams.id])
 
-  const handleUpvote = () => {
-    if (!user) return
-    setUpvoted(!upvoted)
-    setUpvotes(prev => upvoted ? prev - 1 : prev + 1)
+  const handleUpvote = async () => {
+    if (!user || !idea) return
+    
+    const newUpvotes = upvoted ? upvotes - 1 : upvotes + 1
+    const { error } = await supabase
+      .from('ideas')
+      .update({ upvotes: newUpvotes })
+      .eq('id', idea.id)
+
+    if (!error) {
+      setUpvoted(!upvoted)
+      setUpvotes(newUpvotes)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <p className="text-[var(--muted)]">{'>'} loading idea details...</p>
+      </div>
+    )
   }
 
   if (!idea) {
     return (
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="mb-4">
+          <Link href="/collab" className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
+            ← back to ideas
+          </Link>
+        </div>
         <p className="text-[var(--muted)]">[idea not found]</p>
       </div>
     )
@@ -105,22 +143,14 @@ export default function IdeaDetailPage({ params }: { params: Promise<{ id: strin
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <p className="text-sm text-[var(--muted)]">Sketch: {idea.sketch_url}</p>
-                <p className="text-xs text-[var(--muted)] mt-1">[Image placeholder - upload sketch file to see it here]</p>
               </div>
             </div>
           </div>
         )}
 
-        {user ? (
-          <div className="mb-6">
-            <CommentSection ideaId={idea.id} comments={mockIdeaComments[idea.id] || []} />
-          </div>
-        ) : (
-          <div className="mb-6 p-4 border border-[var(--border)] rounded text-center">
-            <p className="text-sm text-[var(--muted)] mb-2">Login to join the conversation</p>
-            <Link href="/login" className="btn-primary text-sm py-2 px-4 inline-block">[login to comment]</Link>
-          </div>
-        )}
+        <div className="mb-6">
+          <CommentSection ideaId={idea.id} />
+        </div>
       </article>
     </div>
   )

@@ -1,66 +1,97 @@
 'use client'
 
-import { mockProjects } from '@/lib/types'
-import { useState, useRef } from 'react'
+import { Project } from '@/lib/types'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import Link from 'next/link'
+import { createClient } from '@/lib/supabase'
 
 interface ProjectForm {
   title: string
   description: string
   tech: string
   url: string
-  image: File | null
 }
 
 export default function ProjectsPage() {
-  const { user } = useAuth()
-  const [visible, setVisible] = useState(true)
+  const { user, username } = useAuth()
+  const supabase = createClient()
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '', image: null })
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '' })
 
-  const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
-  const filteredProjects = mockProjects.filter(p => {
-    const techMatch = filter === 'all' || p.tech.includes(filter)
-    const searchMatch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase())
+  const fetchProjects = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Fetch projects error:', error.message)
+    } else if (data) {
+      setProjects(data as Project[])
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  const allTech = Array.from(new Set(projects.flatMap(p => p.tech || [])))
+  
+  const filteredProjects = projects.filter(p => {
+    const techMatch = filter === 'all' || (p.tech && p.tech.includes(filter))
+    const searchMatch = !search || 
+      p.title.toLowerCase().includes(search.toLowerCase()) || 
+      p.description.toLowerCase().includes(search.toLowerCase())
     return techMatch && searchMatch
   })
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setForm({ ...form, image: file })
-      const reader = new FileReader()
-      reader.onload = () => setImagePreview(reader.result as string)
-      reader.readAsDataURL(file)
-    }
-  }
+  const handleSubmit = async () => {
+    if (!form.title.trim() || !form.description.trim()) return
 
-  const handleSubmit = () => {
-    if (form.title && form.description) {
-      alert(`Project "${form.title}" uploaded! (mock)`)
-      setForm({ title: '', description: '', tech: '', url: '', image: null })
-      setImagePreview(null)
+    const techArray = form.tech
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0)
+
+    const authorName = username || user?.email?.split('@')[0] || 'anonymous'
+
+    const { error } = await supabase.from('projects').insert({
+      title: form.title.trim(),
+      description: form.description.trim(),
+      tech: techArray,
+      author: authorName,
+      url: form.url.trim(),
+      likes: 0
+    })
+
+    if (error) {
+      alert('Error creating project: ' + error.message)
+    } else {
+      setForm({ title: '', description: '', tech: '', url: '' })
       setShowModal(false)
+      fetchProjects()
     }
   }
 
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-      <div className="mb-6 sm:mb-8">
-        <p className="text-xs text-[var(--muted)] mb-1">{'>'} projects_module</p>
-        <h1 className="text-2xl sm:text-3xl font-bold glow">Projects_</h1>
-        <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Built by the community</p>
-      </div>
-
-      <div className="flex justify-end mb-4 sm:mb-6">
-        <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
-          [+ add project]
-        </button>
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <p className="text-xs text-[var(--muted)] mb-1">{'>'} projects_module</p>
+          <h1 className="text-2xl sm:text-3xl font-bold glow">Projects_</h1>
+          <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Built by the community</p>
+        </div>
+        {user && (
+          <button onClick={() => setShowModal(true)} className="btn-primary text-base py-2.5 px-5 self-start sm:self-auto">
+            [+ add project]
+          </button>
+        )}
       </div>
 
       <div className="mb-4 sm:mb-6">
@@ -73,65 +104,74 @@ export default function ProjectsPage() {
         />
       </div>
 
-      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setFilter('all')}
-          className={`text-sm py-1.5 px-3 border ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-        >
-          [all]
-        </button>
-        {allTech.map(tech => (
-          <button
-            key={tech}
-            onClick={() => setFilter(tech)}
-            className={`text-sm py-1.5 px-3 border ${filter === tech ? 'btn-primary' : 'btn-secondary'}`}
-          >
-            [{tech}]
-          </button>
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center py-8">
+          <p className="text-[var(--muted)]">{'>'} loading projects...</p>
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`text-sm py-1.5 px-3 border ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              [all]
+            </button>
+            {allTech.map(tech => (
+              <button
+                key={tech}
+                onClick={() => setFilter(tech)}
+                className={`text-sm py-1.5 px-3 border ${filter === tech ? 'btn-primary' : 'btn-secondary'}`}
+              >
+                [{tech}]
+              </button>
+            ))}
+          </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {filteredProjects.map((project, i) => (
-          <article 
-            key={project.id} 
-            className="card p-4 sm:p-5"
-            style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(10px)', transition: `all 0.3s ease ${i * 0.1}s` }}
-          >
-            <h2 className="text-lg sm:text-xl font-bold mb-2 glow-subtle">
-              {project.title}
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--foreground-dim)] mb-3 sm:mb-4">{project.description}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
-              {project.tech.map(tech => (
-                <span key={tech} className="text-xs border border-[var(--border)] px-2 py-1 text-[var(--muted)]">
-                  {tech}
-                </span>
-              ))}
-            </div>
-            
-            <div className="flex items-center justify-between text-xs text-[var(--muted)]">
-              <span>by @{project.author}</span>
-              <span>♥ {project.likes}</span>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredProjects.map((project) => (
+              <article key={project.id} className="card p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold mb-2 glow-subtle">
+                    {project.title}
+                  </h2>
+                  <p className="text-sm sm:text-base text-[var(--foreground-dim)] mb-3 sm:mb-4">{project.description}</p>
+                  
+                  {project.tech && project.tech.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
+                      {project.tech.map(tech => (
+                        <span key={tech} className="text-xs border border-[var(--border)] px-2 py-1 text-[var(--muted)]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <div className="flex items-center justify-between text-xs text-[var(--muted)] pt-3 border-t border-[var(--border)]">
+                    <span>by @{project.author}</span>
+                    <span>♥ {project.likes || 0}</span>
+                  </div>
 
-            {user && (
-              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[var(--border)]">
-                <button className="btn-secondary text-sm py-1.5 px-3 w-full sm:w-auto">
-                  [view details]
-                </button>
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
-
-      <div className="mt-6 sm:mt-8">
-        <button onClick={() => setShowModal(true)} className="btn-primary text-base py-3 px-6">
-          [+ add project]
-        </button>
-      </div>
+                  {project.url && (
+                    <div className="mt-3 flex justify-end">
+                      <a 
+                        href={project.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-[var(--accent)] hover:underline"
+                      >
+                        [visit site ↗]
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
@@ -166,34 +206,14 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Tech Stack</p>
+                <p className="text-xs text-[var(--muted)] mb-1">Tech Stack (comma separated)</p>
                 <input
                   type="text"
                   value={form.tech}
                   onChange={(e) => setForm({ ...form, tech: e.target.value })}
-                  placeholder="React, Next.js, etc..."
+                  placeholder="React, Next.js, CSS..."
                   className="input w-full"
                 />
-              </div>
-
-              <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Thumbnail Image</p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="btn-secondary text-sm py-2 px-4"
-                >
-                  Choose Image
-                </button>
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 max-h-32 object-contain" />
-                )}
               </div>
 
               <div>

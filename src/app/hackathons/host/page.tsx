@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { mockHackathons } from '@/lib/types'
+import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const themes = [
   { value: 'innovation', label: 'Innovation & Emerging Tech', icon: '🚀' },
@@ -20,6 +21,8 @@ const themes = [
 
 export default function HostHackathonPage() {
   const { user } = useAuth()
+  const router = useRouter()
+  const supabase = createClient()
   const [about, setAbout] = useState('')
   const [theme, setTheme] = useState('')
   const [title, setTitle] = useState('')
@@ -30,14 +33,14 @@ export default function HostHackathonPage() {
     if (!about.trim()) return
 
     const keywords: Record<string, string[]> = {
-      'ai': ['AI', 'machine learning', 'neural networks', 'automation'],
-      'web3': ['blockchain', 'decentralized', 'smart contracts', 'cryptocurrency'],
+      'ai': ['AI', 'machine-learning', 'neural-networks', 'automation'],
+      'web3': ['blockchain', 'decentralized', 'smart-contracts', 'crypto'],
       'education': ['learning', 'education', 'students', 'teaching'],
-      'social': ['community', 'social impact', 'nonprofit', 'volunteer'],
+      'social': ['community', 'social-impact', 'nonprofit', 'volunteer'],
       'health': ['healthcare', 'medical', 'wellness', 'fitness'],
       'finance': ['fintech', 'payments', 'banking', 'financial'],
       'gaming': ['games', 'entertainment', 'interactive', 'fun'],
-      'environment': ['climate', 'sustainability', 'green tech', 'eco'],
+      'environment': ['climate', 'sustainability', 'green-tech', 'eco'],
       'innovation': ['innovation', 'startup', 'tech', 'cutting-edge'],
       'open': ['creativity', 'open', 'anything', 'build']
     }
@@ -61,14 +64,29 @@ export default function HostHackathonPage() {
     }
   }
 
-  const handleCreate = () => {
-    if (!title || !date || !generatedInfo) return
-    alert(`Hackathon "${title}" created! (mock)`)
-    setAbout('')
-    setTheme('')
-    setTitle('')
-    setDate('')
-    setGeneratedInfo(null)
+  const handleCreate = async () => {
+    if (!title || !date || !generatedInfo || !user) return
+
+    const { error } = await supabase.from('hackathons').insert({
+      title: title.trim(),
+      description: generatedInfo.description,
+      date: date,
+      theme: theme,
+      tags: generatedInfo.tags,
+      participants: 0,
+      organizer_id: user.id
+    })
+
+    if (error) {
+      alert('Error creating hackathon: ' + error.message)
+    } else {
+      setAbout('')
+      setTheme('')
+      setTitle('')
+      setDate('')
+      setGeneratedInfo(null)
+      router.push('/hackathons')
+    }
   }
 
   if (!user) {

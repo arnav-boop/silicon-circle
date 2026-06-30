@@ -358,7 +358,13 @@
       membersList.innerHTML = "";
       activeTeam.members.forEach((m, idx) => {
         const li = document.createElement("li");
-        li.innerHTML = `👤 Member ${idx + 1}: <strong>${m}</strong>`;
+        if (typeof m === 'object' && m !== null) {
+          const emailStr = m.email ? `<span style="font-size:0.8rem; color:var(--color-text-muted); margin-left: 0.5rem;">(${m.email})</span>` : '';
+          const phoneStr = m.phone ? `<span style="font-size:0.8rem; color:var(--color-accent); margin-left: 0.5rem;">📞 ${m.phone}</span>` : '';
+          li.innerHTML = `👤 Member ${idx + 1}: <strong>${m.name}</strong>${emailStr}${phoneStr}`;
+        } else {
+          li.innerHTML = `👤 Member ${idx + 1}: <strong>${m}</strong>`;
+        }
         membersList.appendChild(li);
       });
     }
