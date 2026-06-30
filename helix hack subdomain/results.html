@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results & Leaderboard - HelixHack 2026</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="app.js?v=11" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span>🧬</span> HelixHack_
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="details.html">Rules</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="results.html" class="active">Results</a></li>
+        <li><a href="dashboard.html" class="btn btn-secondary btn-sm" style="color:var(--color-primary);">Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="section" style="max-width: 1100px; padding-top: 3rem;" data-feature="results_visible">
+    <div class="section-header">
+      <h2 style="font-family:var(--font-heading);">Results & Standings</h2>
+      <p>Tracking school performance, qualified finalists, and final placements for HelixHack 2026.</p>
+    </div>
+
+    <!-- Podium Placements -->
+    <h3 class="font-heading text-xl mb-4" style="color:var(--color-primary); text-align:center;">🏆 Final Placements (Mock Podium)</h3>
+    <div class="grid-3" style="margin-bottom: 4rem; align-items: flex-end;">
+      <!-- 2nd Place -->
+      <div class="card" style="text-align:center; padding: 1.5rem; order: 1; border-color: rgba(148, 163, 184, 0.3);">
+        <span style="font-size:1.5rem;">🥈</span>
+        <h4 style="font-family:var(--font-heading); margin-top:0.5rem;">2nd Place</h4>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--color-text-main); margin: 0.5rem 0;" id="place-2">EcoWarriors</div>
+        <p style="font-size:0.8rem; color:var(--color-text-dim);" id="place-2-school">DAV Boys Senior Secondary School, Mogappair</p>
+        <span style="display:inline-block; font-size:0.75rem; background:rgba(255,255,255,0.05); padding:0.25rem 0.5rem; border-radius:4px; margin-top:0.75rem;" id="place-2-score">Score: 89</span>
+      </div>
+      <!-- 1st Place -->
+      <div class="card" style="text-align:center; padding: 2.5rem 1.5rem; order: 2; border-color: rgba(234, 179, 8, 0.5); transform: translateY(-10px);">
+        <span style="font-size:2rem;">👑</span>
+        <h4 style="font-family:var(--font-heading); margin-top:0.5rem; color:var(--color-primary);">1st Place Winner</h4>
+        <div style="font-size:1.5rem; font-weight:800; color:var(--color-text-main); margin: 0.5rem 0;" id="place-1">AI Titans</div>
+        <p style="font-size:0.85rem; color:var(--color-text-dim);" id="place-1-school">Padma Seshadri Bala Bhavan (PSBB), Nungambakkam</p>
+        <span style="display:inline-block; font-size:0.8rem; background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.3); padding:0.25rem 0.75rem; border-radius:4px; margin-top:0.75rem; font-weight:600; color:var(--color-primary);" id="place-1-score">Score: 98</span>
+      </div>
+      <!-- 3rd Place -->
+      <div class="card" style="text-align:center; padding: 1.25rem; order: 3; border-color: rgba(180, 83, 9, 0.3);">
+        <span style="font-size:1.25rem;">🥉</span>
+        <h4 style="font-family:var(--font-heading); margin-top:0.5rem;">3rd Place</h4>
+        <div style="font-size:1.15rem; font-weight:700; color:var(--color-text-main); margin: 0.5rem 0;" id="place-3">MindSafe</div>
+        <p style="font-size:0.8rem; color:var(--color-text-dim);" id="place-3-school">Sishya School, Adyar</p>
+        <span style="display:inline-block; font-size:0.75rem; background:rgba(255,255,255,0.05); padding:0.25rem 0.5rem; border-radius:4px; margin-top:0.75rem;" id="place-3-score">Score: 86</span>
+      </div>
+    </div>
+
+    <!-- Leaderboards Grid -->
+    <div style="display:grid; grid-template-cols: 1fr 350px; gap: 2rem; align-items: flex-start;">
+      <!-- Competing Teams List -->
+      <div class="card" style="overflow-x: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1px solid var(--border-glass); padding-bottom:1rem; margin-bottom:1.5rem;">
+          <h3 class="font-heading text-lg" style="margin:0;">👥 Competing Teams</h3>
+          <input type="text" id="search-filter" class="form-input" placeholder="Search by name, school, category..." style="width:250px; padding:0.5rem 0.75rem; font-size:0.85rem;" oninput="filterTeamsTable()" />
+        </div>
+        
+        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-glass); color:var(--color-text-muted);">
+              <th style="padding: 0.75rem 0.5rem;">Team ID</th>
+              <th style="padding: 0.75rem 0.5rem;">Team Name</th>
+              <th style="padding: 0.75rem 0.5rem;">Category</th>
+              <th style="padding: 0.75rem 0.5rem;">Theme</th>
+              <th style="padding: 0.75rem 0.5rem;">School</th>
+              <th style="padding: 0.75rem 0.5rem; text-align:right;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="teams-table-body">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- School Cup Standing -->
+      <div class="card" style="padding:1.5rem;">
+        <h3 class="font-heading text-lg mb-2" style="border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">🏫 School Cup Leaderboard</h3>
+        <p style="color:var(--color-text-muted); font-size:0.75rem; margin-bottom:1rem;">Aggregate scores of all registered school teams combined.</p>
+        
+        <ol id="school-cup-list" style="display:flex; flex-direction:column; gap:0.75rem; padding-left:0; list-style:none;">
+          <!-- Populated dynamically -->
+        </ol>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(async () => {
+        if (typeof db !== "undefined") {
+          await populateLeaderboards();
+        }
+      }, 100); // Small timeout to ensure app.js database initiates
+    });
+
+    async function populateLeaderboards() {
+      // 1. Teams Table
+      const teams = await db.getTeams();
+      const tbody = document.getElementById("teams-table-body");
+      tbody.innerHTML = "";
+      
+      // Update podium dynamically if teams have actual scores
+      const sortedTeams = [...teams].sort((a, b) => (b.scores?.total || 0) - (a.scores?.total || 0));
+      if (sortedTeams.length > 0 && sortedTeams[0].scores?.total > 0) {
+        const first = sortedTeams[0];
+        document.getElementById("place-1").innerText = first.name;
+        document.getElementById("place-1-school").innerText = first.school;
+        document.getElementById("place-1-score").innerText = `Score: ${first.scores?.total || 0}`;
+        
+        if (sortedTeams.length > 1) {
+          const second = sortedTeams[1];
+          document.getElementById("place-2").innerText = second.name;
+          document.getElementById("place-2-school").innerText = second.school;
+          document.getElementById("place-2-score").innerText = `Score: ${second.scores?.total || 0}`;
+        } else {
+          document.getElementById("place-2").innerText = "TBD";
+          document.getElementById("place-2-school").innerText = "-";
+          document.getElementById("place-2-score").innerText = "Score: -";
+        }
+        
+        if (sortedTeams.length > 2) {
+          const third = sortedTeams[2];
+          document.getElementById("place-3").innerText = third.name;
+          document.getElementById("place-3-school").innerText = third.school;
+          document.getElementById("place-3-score").innerText = `Score: ${third.scores?.total || 0}`;
+        } else {
+          document.getElementById("place-3").innerText = "TBD";
+          document.getElementById("place-3-school").innerText = "-";
+          document.getElementById("place-3-score").innerText = "Score: -";
+        }
+      }
+      
+      teams.forEach(t => {
+        const tr = document.createElement("tr");
+        tr.className = "team-row-item";
+        tr.style.borderBottom = "1px solid var(--border-glass)";
+        tr.innerHTML = `
+          <td style="padding:0.75rem 0.5rem; font-family:monospace; font-weight:600; color:var(--color-primary);">${t.id}</td>
+          <td style="padding:0.75rem 0.5rem; font-weight:600;">${t.name}</td>
+          <td style="padding:0.75rem 0.5rem; text-transform:capitalize; color:var(--color-text-dim);">${t.category}</td>
+          <td style="padding:0.75rem 0.5rem; text-transform:uppercase; font-size:0.75rem; color:var(--color-text-muted); font-weight:600;">#${t.theme}</td>
+          <td style="padding:0.75rem 0.5rem; font-size:0.8rem; color:var(--color-text-dim);">${t.school}</td>
+          <td style="padding:0.75rem 0.5rem; text-align:right;">
+            <span class="stat-badge ${t.status === 'fellow' ? 'warn' : ''}" style="font-size:0.75rem; padding:0.2rem 0.5rem; text-transform:uppercase;">${t.status}</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // 2. School Cup
+      const schoolStandings = await db.getSchoolCupStandings();
+      const cupList = document.getElementById("school-cup-list");
+      cupList.innerHTML = "";
+
+      if (schoolStandings.length === 0) {
+        cupList.innerHTML = `<li style="font-size:0.85rem; color:var(--color-text-muted); text-align:center;">No school metrics available yet.</li>`;
+        return;
+      }
+
+      schoolStandings.forEach((school, index) => {
+        const li = document.createElement("li");
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.alignItems = "center";
+        li.style.padding = "0.5rem 0.75rem";
+        li.style.background = "rgba(255, 255, 255, 0.02)";
+        li.style.border = "1px solid var(--border-glass)";
+        li.style.borderRadius = "8px";
+        
+        let medal = "";
+        if (index === 0) medal = "🥇 ";
+        else if (index === 1) medal = "🥈 ";
+        else if (index === 2) medal = "🥉 ";
+        
+        li.innerHTML = `
+          <div style="font-size:0.85rem; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            <strong>${index + 1}.</strong> ${medal}${school.name}
+          </div>
+          <span style="font-size:0.85rem; font-weight:700; color:var(--color-primary);">${school.points} pts</span>
+        `;
+        cupList.appendChild(li);
+      });
+    }
+
+    function filterTeamsTable() {
+      const q = document.getElementById("search-filter").value.trim().toLowerCase();
+      const rows = document.querySelectorAll(".team-row-item");
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(q)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

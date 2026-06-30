@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - HelixHack 2026</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="app.js?v=11" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span>🧬</span> HelixHack_
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="details.html">Rules</a></li>
+        <li><a href="register.html" class="active">Register</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="dashboard.html" class="btn btn-secondary btn-sm" style="color:var(--color-primary);">Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="section" style="max-width: 800px; padding-top: 3rem;">
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <h2 style="font-family:var(--font-heading);">Register Your Team</h2>
+      <p>Forms must be filled out honestly. Registrations close Thursday, September 25, 2026.</p>
+    </div>
+
+    <!-- Registration Form Card -->
+    <div class="card" id="registration-card" data-feature="registration_open">
+      <form id="reg-form" onsubmit="handleRegistration(event)">
+        <!-- Step 1: Basic Info -->
+        <h3 class="font-heading text-lg mb-4" style="border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; color:var(--color-primary);">1. Project & Event Setup</h3>
+        
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="teamName">Team Name</label>
+            <input type="text" id="teamName" class="form-input" placeholder="Enter team name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="school">School Name</label>
+            <input type="text" id="school" class="form-input" placeholder="e.g. DAV Mogappair or Independent" required />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="category">Participation Category</label>
+            <select id="category" class="form-input" required>
+              <option value="" disabled selected>Select category</option>
+              <option value="pitch-only">Pitch-Only (Ideation & Research)</option>
+              <option value="prototype">Prototype (Working Implementation)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="theme">Project Theme</label>
+            <select id="theme" class="form-input" required>
+              <option value="" disabled selected>Select theme</option>
+              <option value="ai">AI & Emerging Technology</option>
+              <option value="sustainability">Sustainability & Climate</option>
+              <option value="wellbeing">Mental Health & EdTech</option>
+              <option value="accessibility">Accessibility & Inclusion</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 2: Leader Details -->
+        <h3 class="font-heading text-lg mb-4 mt-6" style="border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; color:var(--color-primary);">2. Team Leader (Member 1)</h3>
+        
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="leaderName">Full Name</label>
+            <input type="text" id="leaderName" class="form-input" placeholder="Leader full name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="leaderEmail">Email Address</label>
+            <input type="email" id="leaderEmail" class="form-input" placeholder="leader@example.com" required />
+          </div>
+        </div>
+
+        <!-- Step 3: Other Members -->
+        <h3 class="font-heading text-lg mb-4 mt-6" style="border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; color:var(--color-primary);">3. Additional Members (Min 1, Max 4)</h3>
+        <p style="font-size:0.8rem; color:var(--color-text-dim); margin-bottom:1rem;">
+          HelixHack requires teams to have between 2 and 5 members. Ensure member names are spelled correctly for certificates.
+        </p>
+
+        <div id="members-list" class="space-y-4">
+          <!-- Member 2 (Required) -->
+          <div class="member-row grid-2" style="margin-bottom:1rem;">
+            <div class="form-group">
+              <label class="form-label">Member 2 Name</label>
+              <input type="text" class="form-input member-name" placeholder="Member 2 full name" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Member 2 Email</label>
+              <input type="email" class="form-input member-email" placeholder="member2@example.com" required />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 2rem; display:flex; gap:1rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addMemberField()">+ Add Member</button>
+          <button type="button" class="btn btn-secondary btn-sm" style="color:var(--color-secondary);" onclick="removeMemberField()">- Remove Member</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full">Submit Registration</button>
+      </form>
+
+      <!-- Success Screen (Hidden by default) -->
+      <div id="success-screen" style="display:none; text-align:center; padding:1.5rem 0;">
+        <span style="font-size: 3rem; color:var(--color-accent);">🎉</span>
+        <h3 class="font-heading text-2xl mb-2 mt-2">Registration Complete!</h3>
+        <p style="color:var(--color-text-dim); margin-bottom:2rem;">Your team details have been uploaded to Silicon Circle's database.</p>
+
+        <div class="card" style="border-color:var(--color-accent); background:rgba(16, 185, 129, 0.04); max-width:450px; margin:0 auto 2rem auto; text-align:left; display:flex; flex-direction:column; gap:0.5rem;">
+          <div>
+            <span style="color:var(--color-text-muted); font-size:0.85rem;">Team ID:</span>
+            <div style="font-size:1.5rem; font-weight:800; font-family:var(--font-heading); color:var(--color-primary); letter-spacing:0.05em;" id="display-id">HH26-XXXX</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:0.5rem; border-top:1px solid var(--border-glass); padding-top:0.5rem;">
+            <span style="color:var(--color-text-muted); font-size:0.85rem;">Team Name:</span>
+            <span style="font-weight:600;" id="display-team">AI Titans</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--color-text-muted); font-size:0.85rem;">School:</span>
+            <span style="font-weight:600;" id="display-school">PSBB Nungambakkam</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--color-text-muted); font-size:0.85rem;">Category:</span>
+            <span style="font-weight:600; text-transform:capitalize;" id="display-cat">Prototype</span>
+          </div>
+        </div>
+
+        <p style="color:var(--color-text-dim); font-size:0.9rem; max-width:500px; margin:0 auto 2rem auto;">
+          <strong>CRITICAL:</strong> Please save your <strong>Team ID</strong>. You will need it to sign in to the Student Dashboard to upload your final pitch, track your build logs, and view comments from judges.
+        </p>
+
+        <div style="display:flex; gap:1rem; justify-content:center;">
+          <a href="dashboard.html" class="btn btn-primary">Go to Student Dashboard</a>
+          <a href="index.html" class="btn btn-secondary">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let memberCount = 2; // Member 1 (leader) + Member 2 are default
+
+    function addMemberField() {
+      if (memberCount >= 5) {
+        alert("Maximum team size is 5 members.");
+        return;
+      }
+      memberCount++;
+      const list = document.getElementById("members-list");
+      const div = document.createElement("div");
+      div.className = "member-row grid-2";
+      div.id = `member-row-${memberCount}`;
+      div.style.marginBottom = "1rem";
+      div.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Member ${memberCount} Name</label>
+          <input type="text" class="form-input member-name" placeholder="Member ${memberCount} full name" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Member ${memberCount} Email</label>
+          <input type="email" class="form-input member-email" placeholder="member${memberCount}@example.com" required />
+        </div>
+      `;
+      list.appendChild(div);
+    }
+
+    function removeMemberField() {
+      if (memberCount <= 2) {
+        alert("Minimum team size is 2 members.");
+        return;
+      }
+      const row = document.getElementById(`member-row-${memberCount}`);
+      if (row) {
+        row.remove();
+      }
+      memberCount--;
+    }
+
+    async function handleRegistration(e) {
+      e.preventDefault();
+      
+      const teamName = document.getElementById("teamName").value.trim();
+      const school = document.getElementById("school").value.trim();
+      const category = document.getElementById("category").value;
+      const theme = document.getElementById("theme").value;
+      const leaderName = document.getElementById("leaderName").value.trim();
+      const leaderEmail = document.getElementById("leaderEmail").value.trim();
+
+      const memberNames = Array.from(document.querySelectorAll(".member-name")).map(i => i.value.trim());
+
+      const members = [leaderName, ...memberNames];
+
+      // Call database handler (defined in supabase.js)
+      if (typeof db !== "undefined") {
+        const team = await db.registerTeam({
+          name: teamName,
+          school: school,
+          category: category,
+          theme: theme,
+          leaderName: leaderName,
+          leaderEmail: leaderEmail,
+          members: members
+        });
+
+        if (team) {
+          // Hide form and show success screen
+          document.getElementById("reg-form").style.display = "none";
+          
+          document.getElementById("display-id").innerText = team.id;
+          document.getElementById("display-team").innerText = team.name;
+          document.getElementById("display-school").innerText = team.school;
+          document.getElementById("display-cat").innerText = team.category;
+          
+          document.getElementById("success-screen").style.display = "block";
+        } else {
+          alert("Registration failed. Please try again.");
+        }
+      } else {
+        alert("Database connection error. Please refresh and try again.");
+      }
+    }
+  </script>
+</body>
+</html>

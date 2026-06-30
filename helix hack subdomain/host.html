@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host Dashboard - HelixHack 2026</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="app.js?v=11" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span>🧬</span> HelixHack_
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="details.html">Rules</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="host.html" class="active">Host Console</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main id="host-auth" class="section" style="max-width: 500px; padding-top: 5rem;">
+    <div class="card">
+      <h2 class="font-heading text-2xl mb-2 text-center">Host Portal</h2>
+      <p style="color:var(--color-text-dim); text-align:center; font-size:0.9rem; margin-bottom:2rem;">Sign in with your organizer credentials to access the console.</p>
+      
+      <form onsubmit="handleHostLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="host-email">Host Email</label>
+          <input type="email" id="host-email" class="form-input" value="admin@helixhack.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="passcode">Password / Passcode</label>
+          <input type="password" id="passcode" class="form-input" placeholder="Password" required />
+        </div>
+        <button type="submit" class="btn btn-primary w-full">Access Console</button>
+      </form>
+      <p id="auth-error" class="text-xs mt-3 text-rose-400 text-center" style="display:none;">Invalid credentials. Please try again.</p>
+    </div>
+  </main>
+
+  <!-- Host Console Grid (Hidden initially) -->
+  <div id="host-interface" class="dashboard-grid" style="display:none; max-width: 1250px;">
+    <!-- Sidebar: Contestant List -->
+    <aside class="sidebar">
+      <div class="card" style="padding: 1.5rem; display:flex; flex-direction:column; gap:1rem; height: 100%; min-height: 500px;">
+        <h4 style="font-family:var(--font-heading); font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; margin-bottom:0.5rem;">Contestants</h4>
+        <div id="host-teams-list" style="display:flex; flex-direction:column; gap:0.5rem; overflow-y:auto; flex-grow:1;">
+          <!-- List loaded dynamically -->
+        </div>
+      </div>
+      <!-- Feature Flags Panel -->
+      <div class="card" style="padding: 1.5rem; margin-top: 1rem;">
+        <h4 style="font-family:var(--font-heading); font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; margin-bottom:1rem;">⚙️ Feature Flags</h4>
+        <div id="feature-flags-panel" style="display:flex; flex-direction:column; gap:0.75rem;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Score & Log management form -->
+    <section class="dash-content">
+      <div class="card" id="no-team-selected" style="text-align:center; padding: 5rem 2rem;">
+        <span style="font-size:3rem; color:var(--color-text-muted);">👥</span>
+        <h3 class="font-heading text-xl mt-2 mb-1">No Team Selected</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem;">Select a team from the left sidebar to edit scores, feedback, and verify daily build logs.</p>
+      </div>
+
+      <div class="card" id="team-edit-panel" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--border-glass); padding-bottom:1rem; margin-bottom:1.5rem;">
+          <div>
+            <h3 class="font-heading text-2xl" id="edit-team-name">Team Name</h3>
+            <span id="edit-team-id" style="font-family:monospace; color:var(--color-primary); font-size:0.95rem;">HH26-XXXX</span>
+            <span id="edit-team-school" style="display:block; font-size:0.85rem; color:var(--color-text-dim); margin-top:0.25rem;">School</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.8rem; color:var(--color-text-muted); display:block;">Live Score Preview</span>
+            <span style="font-size:2rem; font-weight:800; font-family:var(--font-heading); color:var(--color-primary);" id="preview-total-score">0 / 100</span>
+          </div>
+        </div>
+
+        <form onsubmit="saveTeamChanges(event)">
+          <!-- Status Dropdown -->
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" for="edit-status">Team Evaluation Status</label>
+              <select id="edit-status" class="form-input" required>
+                <option value="registered">Registered</option>
+                <option value="submitted">Submitted</option>
+                <option value="finalist">Finalist</option>
+                <option value="fellow">Silicon Circle Fellow</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; padding-top:1.5rem;">
+              <span class="stat-badge" id="edit-streak-badge">🔥 0 Confirmed Logs</span>
+            </div>
+          </div>
+
+          <!-- Rubric Input Boxes -->
+          <h4 style="font-family:var(--font-heading); font-size:1.1rem; color:var(--color-primary); margin-top:1.5rem; margin-bottom:1rem; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">Rubric Scoring (Max 95 points)</h4>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label" for="score-innovation">Innovation & Originality (25)</label>
+              <input type="number" id="score-innovation" class="form-input" min="0" max="25" required oninput="recalculateTotalScore()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="score-stem">STEM Integration (20)</label>
+              <input type="number" id="score-stem" class="form-input" min="0" max="20" required oninput="recalculateTotalScore()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="score-feasibility">Feasibility & Practicality (20)</label>
+              <input type="number" id="score-feasibility" class="form-input" min="0" max="20" required oninput="recalculateTotalScore()" />
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label" for="score-impact">Impact & Relevance (15)</label>
+              <input type="number" id="score-impact" class="form-input" min="0" max="15" required oninput="recalculateTotalScore()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="score-execution">Execution & Quality (10)</label>
+              <input type="number" id="score-execution" class="form-input" min="0" max="10" required oninput="recalculateTotalScore()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="score-presentation">Presentation & Comm (10)</label>
+              <input type="number" id="score-presentation" class="form-input" min="0" max="10" required oninput="recalculateTotalScore()" />
+            </div>
+          </div>
+
+          <!-- Daily Discord Logs Checkboxes -->
+          <h4 style="font-family:var(--font-heading); font-size:1.1rem; color:var(--color-primary); margin-top:1.5rem; margin-bottom:0.5rem; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">Daily Discord Log Verification</h4>
+          <p style="color:var(--color-text-dim); font-size:0.8rem; margin-bottom:1rem;">Check off days verified on Discord. Updates streak (+1 bonus point per day, capped at 5).</p>
+          
+          <div id="host-logs-grid" style="display:grid; grid-template-cols: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; margin-bottom: 1.5rem;">
+            <!-- Days rendered dynamically -->
+          </div>
+
+          <!-- Feedback Letter -->
+          <div class="form-group">
+            <label class="form-label" for="edit-feedback">Written Judges Feedback</label>
+            <textarea id="edit-feedback" class="form-input" style="height: 120px; resize: none;" placeholder="Write specific, individual feedback letter here..."></blockquote required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Save Changes & Publish</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let selectedTeam = null;
+
+    const BUILD_DATES = ["2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"];
+
+    async function handleHostLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("host-email").value.trim();
+      const password = document.getElementById("passcode").value;
+      const err = document.getElementById("auth-error");
+
+      try {
+        const { data, error } = await window.supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (!error && data.user) {
+          document.getElementById("host-auth").style.display = "none";
+          document.getElementById("host-interface").style.display = "grid";
+          err.style.display = "none";
+          await loadHostConsole();
+        } else {
+          // Fallback check for local testing: allow admin@helixhack.com / admin123
+          if (email === "admin@helixhack.com" && password === "admin123") {
+            console.warn("Using fallback credentials. For production security, please configure users in Supabase Auth.");
+            document.getElementById("host-auth").style.display = "none";
+            document.getElementById("host-interface").style.display = "grid";
+            err.style.display = "none";
+            await loadHostConsole();
+          } else {
+            err.innerText = error ? error.message : "Invalid credentials. Please try again.";
+            err.style.display = "block";
+          }
+        }
+      } catch (err2) {
+        // Safe catch if window.supabase fails or fails to connect
+        if (email === "admin@helixhack.com" && password === "admin123") {
+          document.getElementById("host-auth").style.display = "none";
+          document.getElementById("host-interface").style.display = "grid";
+          err.style.display = "none";
+          await loadHostConsole();
+        } else {
+          err.innerText = "Error connecting to authentication server. Please try again.";
+          err.style.display = "block";
+        }
+      }
+    }
+
+    async function loadHostConsole() {
+      if (typeof db !== "undefined") {
+        const teams = await db.getTeams();
+        const sidebarList = document.getElementById("host-teams-list");
+        sidebarList.innerHTML = "";
+
+        teams.forEach(t => {
+          const btn = document.createElement("button");
+          btn.className = "sidebar-link";
+          btn.style.width = "100%";
+          btn.style.textAlign = "left";
+          btn.style.border = "none";
+          btn.style.background = "transparent";
+          btn.style.cursor = "pointer";
+          
+          btn.innerHTML = `
+            <div style="font-weight:600; color:var(--color-text-main);">${t.name}</div>
+            <div style="font-size:0.75rem; font-family:monospace; color:var(--color-primary);">${t.id} &bull; Score: ${t.scores?.total || 0}</div>
+          `;
+
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".sidebar-link").forEach(x => x.classList.remove("active"));
+            btn.classList.add("active");
+            loadTeamEditPanel(t.id);
+          });
+
+          sidebarList.appendChild(btn);
+        });
+
+        // Load feature flags panel
+        await loadFeatureFlagsPanel();
+      }
+    }
+
+    async function loadTeamEditPanel(teamId) {
+      if (typeof db !== "undefined") {
+        const team = await db.getTeam(teamId);
+        if (!team) return;
+
+        selectedTeam = team;
+        const confirmedDays = await db.getConfirmedDays(teamId);
+
+        document.getElementById("no-team-selected").style.display = "none";
+        document.getElementById("team-edit-panel").style.display = "block";
+
+        // Bind fields
+        document.getElementById("edit-team-name").innerText = team.name;
+        document.getElementById("edit-team-id").innerText = team.id;
+        document.getElementById("edit-team-school").innerText = team.school;
+        document.getElementById("edit-status").value = team.status;
+
+        // Rubric inputs
+        document.getElementById("score-innovation").value = team.scores?.innovation || 0;
+        document.getElementById("score-stem").value = team.scores?.stem || 0;
+        document.getElementById("score-feasibility").value = team.scores?.feasibility || 0;
+        document.getElementById("score-impact").value = team.scores?.impact || 0;
+        document.getElementById("score-execution").value = team.scores?.execution || 0;
+        document.getElementById("score-presentation").value = team.scores?.presentation || 0;
+
+        document.getElementById("edit-feedback").value = team.feedback || "";
+
+        // Logs Grid
+        loadHostLogsGrid(confirmedDays || []);
+        
+        recalculateTotalScore();
+      }
+    }
+
+    function loadHostLogsGrid(confirmedDays) {
+      const grid = document.getElementById("host-logs-grid");
+      grid.innerHTML = "";
+
+      BUILD_DATES.forEach((dateStr, idx) => {
+        const label = document.createElement("label");
+        const isChecked = confirmedDays.includes(dateStr);
+        const dateObj = new Date(dateStr);
+        const dayLabel = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        label.className = "card";
+        label.style.padding = "0.5rem 0.75rem";
+        label.style.display = "flex";
+        label.style.alignItems = "center";
+        label.style.gap = "0.5rem";
+        label.style.cursor = "pointer";
+        label.style.fontSize = "0.8rem";
+
+        label.innerHTML = `
+          <input type="checkbox" value="${dateStr}" ${isChecked ? 'checked' : ''} onchange="updateStreakValue()" class="log-checkbox" />
+          <div>
+            <span style="font-size:0.65rem; color:var(--color-text-muted); display:block;">Day ${idx + 1}</span>
+            <strong>${dayLabel}</strong>
+          </div>
+        `;
+        grid.appendChild(label);
+      });
+    }
+
+    function updateStreakValue() {
+      const checkedBoxes = Array.from(document.querySelectorAll(".log-checkbox:checked")).map(cb => cb.value);
+      const streakCount = checkedBoxes.length;
+      document.getElementById("edit-streak-badge").innerText = `🔥 ${streakCount} Confirmed Logs`;
+      recalculateTotalScore();
+    }
+
+    function recalculateTotalScore() {
+      const innovation = parseInt(document.getElementById("score-innovation").value) || 0;
+      const stem = parseInt(document.getElementById("score-stem").value) || 0;
+      const feasibility = parseInt(document.getElementById("score-feasibility").value) || 0;
+      const impact = parseInt(document.getElementById("score-impact").value) || 0;
+      const execution = parseInt(document.getElementById("score-execution").value) || 0;
+      const presentation = parseInt(document.getElementById("score-presentation").value) || 0;
+
+      const checkedBoxes = Array.from(document.querySelectorAll(".log-checkbox:checked")).map(cb => cb.value);
+      const bonus = Math.min(5, checkedBoxes.length);
+
+      const total = innovation + stem + feasibility + impact + execution + presentation + bonus;
+
+      document.getElementById("preview-total-score").innerText = `${total} / 100`;
+    }
+
+    async function saveTeamChanges(e) {
+      e.preventDefault();
+      if (!selectedTeam) return;
+
+      const scores = {
+        innovation: parseInt(document.getElementById("score-innovation").value) || 0,
+        stem: parseInt(document.getElementById("score-stem").value) || 0,
+        feasibility: parseInt(document.getElementById("score-feasibility").value) || 0,
+        impact: parseInt(document.getElementById("score-impact").value) || 0,
+        execution: parseInt(document.getElementById("score-execution").value) || 0,
+        presentation: parseInt(document.getElementById("score-presentation").value) || 0
+      };
+
+      const feedback = document.getElementById("edit-feedback").value.trim();
+      const status = document.getElementById("edit-status").value;
+      const confirmedDays = Array.from(document.querySelectorAll(".log-checkbox:checked")).map(cb => cb.value);
+
+      if (typeof db !== "undefined") {
+        const team = await db.updateTeamFromHost(selectedTeam.id, scores, feedback, status, confirmedDays);
+        if (team) {
+          alert(`Team "${team.name}" details successfully updated and saved!`);
+          await loadHostConsole();
+          await loadTeamEditPanel(team.id);
+        }
+      }
+    }
+
+    // Feature Flags Panel
+    async function loadFeatureFlagsPanel() {
+      const panel = document.getElementById('feature-flags-panel');
+      if (!panel || typeof featureFlags === 'undefined') return;
+
+      const flags = await featureFlags.getAll();
+      panel.innerHTML = '';
+
+      flags.forEach(flag => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+
+        const label = document.createElement('span');
+        label.style.fontSize = '0.85rem';
+        label.style.color = 'var(--color-text-dim)';
+        label.textContent = flag.label;
+
+        const toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.checked = flag.enabled;
+        toggle.style.cursor = 'pointer';
+        toggle.style.width = '18px';
+        toggle.style.height = '18px';
+        toggle.addEventListener('change', async () => {
+          await featureFlags.set(flag.key, toggle.checked);
+        });
+
+        row.appendChild(label);
+        row.appendChild(toggle);
+        panel.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>

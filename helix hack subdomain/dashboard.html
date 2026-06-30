@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - HelixHack 2026</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="app.js?v=11" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span>🧬</span> HelixHack_
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="details.html">Rules</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div data-feature="dashboard_enabled">
+    <!-- Main Container -->
+    <main id="auth-container" class="section" style="max-width: 500px; padding-top: 5rem;">
+      <div class="card">
+        <h2 class="font-heading text-2xl mb-2 text-center">Student Dashboard</h2>
+        <p style="color:var(--color-text-dim); text-align:center; font-size:0.9rem; margin-bottom:2rem;">Sign in with your Team ID to view details and submit projects.</p>
+        
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label" for="login-id">Team ID</label>
+            <input type="text" id="login-id" class="form-input" placeholder="e.g. HH26-7842" required style="font-family: monospace; letter-spacing: 0.1em;" />
+          </div>
+          <button type="submit" class="btn btn-primary w-full">Sign In</button>
+        </form>
+        <p id="login-error" class="text-xs mt-3 text-rose-400 text-center" style="display:none;">Invalid Team ID. Please check and try again.</p>
+      </div>
+    </main>
+
+    <!-- Dashboard Interface (Hidden initially) -->
+    <div id="dash-interface" class="dashboard-grid" style="display:none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="card" style="padding: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
+        <div>
+          <h4 id="dash-team-name" style="font-family:var(--font-heading); font-size:1.2rem;">Team Name</h4>
+          <span id="dash-team-id" style="font-family: monospace; color:var(--color-primary); font-size:0.9rem;">HH26-XXXX</span>
+        </div>
+        
+        <div style="border-top: 1px solid var(--border-glass); padding-top: 1rem;">
+          <span style="font-size: 0.8rem; color:var(--color-text-muted); display:block; margin-bottom:0.25rem;">Logging Streak</span>
+          <div class="stat-badge" id="dash-streak">
+            <span>🔥</span> <span id="dash-streak-count">0</span> Days
+          </div>
+        </div>
+
+        <nav class="sidebar-nav" style="margin-top: 1rem;">
+          <a href="#" class="sidebar-link active" onclick="showTab('profile', event)">🧬 Profile Overview</a>
+          <a href="#" class="sidebar-link" onclick="showTab('submit', event)">📤 Project Submission</a>
+          <a href="#" class="sidebar-link" onclick="showTab('logs', event)">📝 Daily Build Log</a>
+          <a href="#" class="sidebar-link" onclick="showTab('scores', event)">📊 Scores & Feedback</a>
+          <a href="#" class="sidebar-link" onclick="showTab('bingo', event)">🎯 Icebreaker Bingo</a>
+        </nav>
+        
+        <button onclick="handleLogout()" class="btn btn-secondary btn-sm" style="margin-top:1rem; border-color:var(--border-glass);">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="dash-content">
+      <!-- Profile Tab -->
+      <div id="tab-profile" class="tab-pane card">
+        <h3 class="font-heading text-xl mb-4" style="color:var(--color-primary); border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem;">🧬 Profile Overview</h3>
+        <div class="grid-2" style="margin-bottom: 1.5rem;">
+          <div>
+            <span style="color:var(--color-text-muted); font-size:0.85rem; display:block;">School / Institution</span>
+            <span style="font-weight:600;" id="prof-school">-</span>
+          </div>
+          <div>
+            <span style="color:var(--color-text-muted); font-size:0.85rem; display:block;">Status</span>
+            <span class="stat-badge warn" id="prof-status" style="text-transform:capitalize;">-</span>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-bottom: 1.5rem;">
+          <div>
+            <span style="color:var(--color-text-muted); font-size:0.85rem; display:block;">Category</span>
+            <span style="font-weight:600; text-transform:capitalize;" id="prof-cat">-</span>
+          </div>
+          <div>
+            <span style="color:var(--color-text-muted); font-size:0.85rem; display:block;">Project Theme</span>
+            <span style="font-weight:600; text-transform:capitalize;" id="prof-theme">-</span>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border-glass); padding-top:1rem;">
+          <h4 style="font-family:var(--font-heading); margin-bottom:0.5rem; font-size:1rem;">Team Members</h4>
+          <ul id="prof-members" style="list-style:none; padding-left:0; color:var(--color-text-dim); display:flex; flex-direction:column; gap:0.25rem;">
+          </ul>
+        </div>
+      </div>
+
+      <!-- Project Submission Tab -->
+      <div id="tab-submit" class="tab-pane card" style="display:none;">
+        <h3 class="font-heading text-xl mb-2" style="color:var(--color-primary);">📤 Round 1 Submission Portal</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1.5rem;">
+          Submit your project outline. Depending on the size of registered teams, Round 1 will follow Path A (Pitch Slides) or Path B (Written Description).
+        </p>
+
+        <!-- Toggle Switch -->
+        <div class="card" style="padding: 1rem; border-color:var(--border-glass); margin-bottom: 1.5rem; display:flex; gap:1rem; align-items:center;">
+          <span style="font-size:0.85rem; font-weight:600;">Submission Path:</span>
+          <button class="btn btn-secondary btn-sm active" id="btn-path-a" onclick="switchSubmissionType('link')">Path A (Pitch Slides Link)</button>
+          <button class="btn btn-secondary btn-sm" id="btn-path-b" onclick="switchSubmissionType('paragraph')">Path B (Written Paragraph)</button>
+        </div>
+
+        <form onsubmit="handleProjectSubmission(event)">
+          <!-- Slides Link Input (Path A) -->
+          <div id="submission-link-container">
+            <div class="form-group">
+              <label class="form-label" for="submit-link">Google Slides / GitHub Link</label>
+              <input type="url" id="submit-link" class="form-input" placeholder="https://docs.google.com/presentation/d/..." />
+              <p style="font-size:0.75rem; color:var(--color-text-muted); mt-1;">Ensure permissions are set to "Anyone with the link can view".</p>
+            </div>
+          </div>
+
+          <!-- Paragraph Text Input (Path B) -->
+          <div id="submission-paragraph-container" style="display:none;">
+            <div class="form-group">
+              <label class="form-label" for="submit-paragraph">Project Rationale (Max 300 words)</label>
+              <textarea id="submit-paragraph" class="form-input" style="height: 180px; resize: none;" placeholder="Explain the problem statement, proposed solution, and basic STEM integration in 300 words or less..." oninput="countWords()"></textarea>
+              <div style="display:flex; justify-content:space-between; margin-top:0.25rem;">
+                <span id="word-count-error" style="font-size:0.75rem; color:var(--color-secondary); display:none;">Over 300 word limit!</span>
+                <span style="font-size:0.75rem; color:var(--color-text-muted); margin-left:auto;"><span id="word-counter">0</span> / 300 words</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" id="btn-submit-project">Save Submission</button>
+        </form>
+
+        <!-- Saved Submissions Overview -->
+        <div id="saved-submission-card" class="card" style="margin-top: 1.5rem; display:none; background: rgba(14, 165, 233, 0.03); border-color: rgba(14, 165, 233, 0.2);">
+          <h4 style="font-family:var(--font-heading); font-size:0.95rem; color:var(--color-primary); display:flex; justify-content:space-between; align-items:center;">
+            <span>✓ Current Submission Saved</span>
+            <span id="saved-time" style="font-size:0.75rem; font-weight:normal; color:var(--color-text-muted);">Timestamp</span>
+          </h4>
+          <div id="saved-content" style="font-size:0.9rem; color:var(--color-text-dim); margin-top:0.5rem; word-break: break-all;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Build Log Tab -->
+      <div id="tab-logs" class="tab-pane card" style="display:none;">
+        <h3 class="font-heading text-xl mb-2" style="color:var(--color-primary);">📝 Daily Build Log</h3>
+        
+        <div class="card" style="border-color:rgba(14,165,233,0.3); background:rgba(14,165,233,0.03); margin-bottom:1.5rem;">
+          <h4 style="font-family:var(--font-heading); color:var(--color-primary); margin-bottom:0.5rem;">Discord Upload Verification</h4>
+          <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1rem;">
+            Please post your progress logs daily to our official Discord server in the <strong>#daily-logs</strong> channel. Silicon Circle hosts will review your posts and confirm them below.
+          </p>
+          <a href="https://discord.gg/siliconcircle" target="_blank" class="btn btn-primary btn-sm">Join Discord #daily-logs</a>
+        </div>
+        
+        <h4 style="font-family:var(--font-heading); margin-bottom:1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.25rem;">Build Period Log Calendar</h4>
+        
+        <div id="logs-calendar-grid" style="display:grid; grid-template-cols: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem;">
+          <!-- Calendar items will load dynamically -->
+        </div>
+      </div>
+
+      <!-- Scores & Feedback Tab -->
+      <div id="tab-scores" class="tab-pane card" style="display:none;">
+        <h3 class="font-heading text-xl mb-4" style="color:var(--color-primary); border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">📊 Rubric Breakdown (100 Points)</h3>
+        
+        <div style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>Innovation & Originality (Max 25)</span>
+            <span style="font-weight:600;"><span id="score-innov">0</span> / 25</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>STEM Integration (Max 20)</span>
+            <span style="font-weight:600;"><span id="score-stem">0</span> / 20</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>Feasibility & Practicality (Max 20)</span>
+            <span style="font-weight:600;"><span id="score-feas">0</span> / 20</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>Impact & Theme Relevance (Max 15)</span>
+            <span style="font-weight:600;"><span id="score-impact">0</span> / 15</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>Execution & Quality (Max 10)</span>
+            <span style="font-weight:600;"><span id="score-exec">0</span> / 10</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem;">
+            <span>Presentation & Communication (Max 10)</span>
+            <span style="font-weight:600;"><span id="score-pres">0</span> / 10</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-glass); padding-bottom:0.25rem; color:var(--color-accent);">
+            <span>Daily Logging Bonus (Max 5)</span>
+            <span style="font-weight:600;"><span id="score-bonus">0</span> / 5</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:0.5rem; font-size:1.25rem; font-weight:700; color:var(--color-primary);">
+            <span>Total Score</span>
+            <span><span id="score-total">0</span> / 100</span>
+          </div>
+        </div>
+
+        <h3 class="font-heading text-lg mb-2">Judges Feedback Letter</h3>
+        <div class="card" style="background:rgba(255,255,255,0.01); border-color:var(--border-glass);">
+          <p id="scores-feedback" style="color:var(--color-text-dim); font-size:0.95rem; line-height:1.6;">
+            No scores or feedback are published for your team yet. Submissions open soon.
+          </p>
+        </div>
+      </div>
+
+      <!-- Icebreaker Bingo Tab -->
+      <div id="tab-bingo" class="tab-pane card" style="display:none;">
+        <h3 class="font-heading text-xl mb-2" style="color:var(--color-primary);">🎯 Finale Icebreaker Bingo</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1.5rem;">
+          Before judging starts at the Chennai finale, find other teams that match these traits. Click a square and enter their **Team ID** to verify and mark it checked!
+        </p>
+
+        <div class="bingo-container">
+          <div class="bingo-grid" id="bingo-board">
+            <!-- 5x5 grid cells populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+  </div>
+
+  <script>
+    let activeTeam = null;
+    let selectedSubmissionType = "link"; // default
+
+    // Traits map for validation
+    const BINGO_TRAITS = [
+      { id: 1, title: "Uses AI Theme", trait: "theme", value: "ai" },
+      { id: 2, title: "DAV School", trait: "school", value: "DAV Boys Senior Secondary School, Mogappair" },
+      { id: 3, title: "Pitch Category", trait: "category", value: "pitch-only" },
+      { id: 4, title: "Chennai Water focus", trait: "theme", value: "sustainability" },
+      { id: 5, title: "Sishya School", trait: "school", value: "Sishya School, Adyar" },
+      
+      { id: 6, title: "Prototype Cat", trait: "category", value: "prototype" },
+      { id: 7, title: "Wellbeing Theme", trait: "theme", value: "wellbeing" },
+      { id: 8, title: "Has 3 Members", trait: "members_count", value: 3 },
+      { id: 9, title: "Accessibility Theme", trait: "theme", value: "accessibility" },
+      { id: 10, title: "DAV School", trait: "school", value: "DAV Boys Senior Secondary School, Mogappair" },
+      
+      { id: 11, title: "Uses AI Theme", trait: "theme", value: "ai" },
+      { id: 12, title: "Prototype Cat", trait: "category", value: "prototype" },
+      { id: 13, title: "FREE SPACE", trait: "free", value: true },
+      { id: 14, title: "PSBB School", trait: "school", value: "Padma Seshadri Bala Bhavan (PSBB), Nungambakkam" },
+      { id: 15, title: "Has 2 Members", trait: "members_count", value: 2 },
+      
+      { id: 16, title: "Pitch Category", trait: "category", value: "pitch-only" },
+      { id: 17, title: "Chennai Water focus", trait: "theme", value: "sustainability" },
+      { id: 18, title: "Chettinad School", trait: "school", value: "Chettinad Vidyashram" },
+      { id: 19, title: "Wellbeing Theme", trait: "theme", value: "wellbeing" },
+      { id: 20, title: "Uses AI Theme", trait: "theme", value: "ai" },
+      
+      { id: 21, title: "Has 4 Members", trait: "members_count", value: 4 },
+      { id: 22, title: "Accessibility Theme", trait: "theme", value: "accessibility" },
+      { id: 23, title: "Prototype Cat", trait: "category", value: "prototype" },
+      { id: 24, title: "Chennai Water focus", trait: "theme", value: "sustainability" },
+      { id: 25, title: "PSBB School", trait: "school", value: "Padma Seshadri Bala Bhavan (PSBB), Nungambakkam" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Check if logged in
+      const savedId = sessionStorage.getItem("active_team_id");
+      if (savedId && typeof db !== "undefined") {
+        const team = await db.getTeam(savedId);
+        if (team) {
+          loadDashboard(team);
+        }
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById("login-id").value.trim();
+      const err = document.getElementById("login-error");
+      
+      if (typeof db !== "undefined") {
+        const team = await db.getTeam(id);
+        if (team) {
+          sessionStorage.setItem("active_team_id", team.id);
+          err.style.display = "none";
+          loadDashboard(team);
+        } else {
+          err.style.display = "block";
+        }
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem("active_team_id");
+      window.location.reload();
+    }
+
+    function loadDashboard(team) {
+      activeTeam = team;
+      document.getElementById("auth-container").style.display = "none";
+      document.getElementById("dash-interface").style.display = "grid";
+
+      // Bind sidebar values
+      document.getElementById("dash-team-name").innerText = team.name;
+      document.getElementById("dash-team-id").innerText = team.id;
+      document.getElementById("dash-streak-count").innerText = team.streak;
+
+      // Populate tabs
+      loadProfileTab();
+      loadSubmissionTab();
+      loadLogsTab();
+      loadScoresTab();
+      loadBingoTab();
+    }
+
+    function showTab(tabId, e) {
+      if (e) e.preventDefault();
+      
+      // Update sidebar active state
+      document.querySelectorAll(".sidebar-link").forEach(link => {
+        link.classList.remove("active");
+      });
+      if (e) e.target.classList.add("active");
+
+      // Hide all panels
+      document.querySelectorAll(".tab-pane").forEach(pane => {
+        pane.style.display = "none";
+      });
+
+      // Show targeted panel
+      document.getElementById(`tab-${tabId}`).style.display = "block";
+    }
+
+    // 1. Profile Overview
+    function loadProfileTab() {
+      document.getElementById("prof-school").innerText = activeTeam.school;
+      document.getElementById("prof-status").innerText = activeTeam.status;
+      document.getElementById("prof-cat").innerText = activeTeam.category;
+      document.getElementById("prof-theme").innerText = activeTeam.theme;
+
+      const membersList = document.getElementById("prof-members");
+      membersList.innerHTML = "";
+      activeTeam.members.forEach((m, idx) => {
+        const li = document.createElement("li");
+        li.innerHTML = `👤 Member ${idx + 1}: <strong>${m}</strong>`;
+        membersList.appendChild(li);
+      });
+    }
+
+    // 2. Project Submission
+    function loadSubmissionTab() {
+      const sub = activeTeam.submissions.round1;
+      const savedCard = document.getElementById("saved-submission-card");
+      
+      if (sub) {
+        savedCard.style.display = "block";
+        document.getElementById("saved-time").innerText = new Date(sub.timestamp).toLocaleString();
+        
+        if (sub.type === "link") {
+          document.getElementById("saved-content").innerHTML = `Slides Link: <a href="${sub.content}" target="_blank" style="color:var(--color-primary);">${sub.content}</a>`;
+          switchSubmissionType("link");
+          document.getElementById("submit-link").value = sub.content;
+        } else {
+          document.getElementById("saved-content").innerHTML = `Written Paragraph:<br><blockquote style="font-style:italic; padding-left:1rem; border-left:2px solid var(--color-secondary); color:var(--color-text-dim); margin-top:0.5rem;">"${sub.content}"</blockquote>`;
+          switchSubmissionType("paragraph");
+          document.getElementById("submit-paragraph").value = sub.content;
+          countWords();
+        }
+      } else {
+        savedCard.style.display = "none";
+      }
+    }
+
+    function switchSubmissionType(type) {
+      selectedSubmissionType = type;
+      const btnLink = document.getElementById("btn-path-a");
+      const btnPara = document.getElementById("btn-path-b");
+      
+      if (type === "link") {
+        btnLink.classList.add("active");
+        btnPara.classList.remove("active");
+        document.getElementById("submission-link-container").style.display = "block";
+        document.getElementById("submission-paragraph-container").style.display = "none";
+      } else {
+        btnLink.classList.remove("active");
+        btnPara.classList.add("active");
+        document.getElementById("submission-link-container").style.display = "none";
+        document.getElementById("submission-paragraph-container").style.display = "block";
+      }
+    }
+
+    function countWords() {
+      const text = document.getElementById("submit-paragraph").value.trim();
+      const count = text === "" ? 0 : text.split(/\s+/).length;
+      document.getElementById("word-counter").innerText = count;
+
+      const err = document.getElementById("word-count-error");
+      const btn = document.getElementById("btn-submit-project");
+      
+      if (count > 300) {
+        err.style.display = "block";
+        btn.disabled = true;
+      } else {
+        err.style.display = "none";
+        btn.disabled = false;
+      }
+    }
+
+    async function handleProjectSubmission(e) {
+      e.preventDefault();
+      const content = selectedSubmissionType === "link" 
+        ? document.getElementById("submit-link").value.trim()
+        : document.getElementById("submit-paragraph").value.trim();
+
+      if (!content) return;
+
+      if (typeof db !== "undefined") {
+        const success = await db.submitProject(activeTeam.id, selectedSubmissionType, content);
+        if (success) {
+          alert("Submission saved successfully!");
+          // Reload database states
+          const updated = await db.getTeam(activeTeam.id);
+          loadDashboard(updated);
+        }
+      }
+    }
+
+    // 3. Daily Build Log
+    function loadLogsTab() {
+      const grid = document.getElementById("logs-calendar-grid");
+      grid.innerHTML = "";
+
+      const BUILD_DATES = ["2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"];
+
+      const confirmed = activeTeam.confirmedDays || [];
+
+      BUILD_DATES.forEach((dateStr, idx) => {
+        const item = document.createElement("div");
+        const isConfirmed = confirmed.includes(dateStr);
+        const dateObj = new Date(dateStr);
+        const dayLabel = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        item.className = "card";
+        item.style.padding = "0.75rem";
+        item.style.textAlign = "center";
+        item.style.borderColor = isConfirmed ? "var(--color-accent)" : "var(--border-glass)";
+        item.style.background = isConfirmed ? "rgba(16, 185, 129, 0.05)" : "var(--bg-card)";
+        
+        item.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--color-text-muted); font-weight:600;">Day ${idx + 1}</div>
+          <div style="font-family:var(--font-heading); font-weight:700; font-size:0.85rem; margin:0.25rem 0;">${dayLabel}</div>
+          <div style="font-size:0.75rem; color: ${isConfirmed ? 'var(--color-accent)' : 'var(--color-text-dim)'}; font-weight:600;">
+            ${isConfirmed ? '✅ Confirmed' : '⏳ Pending'}
+          </div>
+        `;
+        grid.appendChild(item);
+      });
+    }
+
+    // 4. Scores & Feedback
+    function loadScoresTab() {
+      const sc = activeTeam.scores;
+      document.getElementById("score-innov").innerText = sc.innovation;
+      document.getElementById("score-stem").innerText = sc.stem;
+      document.getElementById("score-feas").innerText = sc.feasibility;
+      document.getElementById("score-impact").innerText = sc.impact;
+      document.getElementById("score-exec").innerText = sc.execution;
+      document.getElementById("score-pres").innerText = sc.presentation;
+      document.getElementById("score-bonus").innerText = sc.bonus;
+      document.getElementById("score-total").innerText = sc.total;
+
+      const fld = document.getElementById("scores-feedback");
+      if (activeTeam.feedback) {
+        fld.innerHTML = activeTeam.feedback;
+      } else {
+        fld.innerHTML = "No scores or feedback are published for your team yet.";
+      }
+    }
+
+    // 5. Bingo Board
+    function loadBingoTab() {
+      const grid = document.getElementById("bingo-board");
+      grid.innerHTML = "";
+
+      // Load checked states from local storage for this team
+      const checkedKey = `bingo_checked_${activeTeam.id}`;
+      const checkedCells = JSON.parse(localStorage.getItem(checkedKey)) || [13]; // Free space default
+
+      BINGO_TRAITS.forEach(cell => {
+        const div = document.createElement("div");
+        const isChecked = checkedCells.includes(cell.id);
+        
+        div.className = `bingo-cell ${cell.trait === "free" ? "free" : ""} ${isChecked ? "checked" : ""}`;
+        div.id = `bingo-cell-${cell.id}`;
+        
+        if (cell.trait === "free") {
+          div.innerHTML = `⭐<br><strong>FREE SPACE</strong>`;
+        } else {
+          div.innerHTML = `<span>${cell.title}</span>`;
+        }
+
+        div.addEventListener("click", () => {
+          if (cell.trait === "free") return;
+          if (isChecked) {
+            alert("This square is already checked off!");
+            return;
+          }
+          triggerBingoVerification(cell.id, cell);
+        });
+
+        grid.appendChild(div);
+      });
+    }
+
+    async function triggerBingoVerification(cellId, cell) {
+      const targetTeamId = prompt(`Who matches "${cell.title}"? Enter their Team ID:`);
+      if (!targetTeamId) return;
+
+      if (typeof db !== "undefined") {
+        const partner = await db.getTeam(targetTeamId);
+        if (!partner) {
+          alert("Team ID not found. Ensure the spelling is correct (e.g. HH26-7842).");
+          return;
+        }
+
+        if (partner.id === activeTeam.id) {
+          alert("You cannot use your own Team ID for the bingo challenge!");
+          return;
+        }
+
+        // Validate trait
+        let isValid = false;
+        if (cell.trait === "theme" && partner.theme === cell.value) isValid = true;
+        if (cell.trait === "category" && partner.category === cell.value) isValid = true;
+        if (cell.trait === "school" && partner.school === cell.value) isValid = true;
+        if (cell.trait === "members_count" && partner.members.length === cell.value) isValid = true;
+
+        if (isValid) {
+          alert(`Verification successful! "${partner.name}" has been matched for this square.`);
+          
+          const checkedKey = `bingo_checked_${activeTeam.id}`;
+          const checkedCells = JSON.parse(localStorage.getItem(checkedKey)) || [13];
+          checkedCells.push(cellId);
+          localStorage.setItem(checkedKey, JSON.stringify(checkedCells));
+          
+          loadBingoTab(); // Refresh grid
+        } else {
+          alert(`Verification failed. "${partner.name}" does not match the trait "${cell.title}".`);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

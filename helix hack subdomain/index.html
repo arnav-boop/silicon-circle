@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelixHack 2026 - Teen Innovation Hackathon</title>
+  <meta name="description" content="Silicon Circle's inaugural teen innovation hackathon in Chennai, India. Compete, build, and solve real-world problems.">
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  
+  <script src="app.js?v=11" defer></script>
+</head>
+<body>
+  <div id="canvas-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0;"></div>
+  <div class="bg-grid"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <span>🧬</span> HelixHack_
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Overview</a></li>
+        <li><a href="details.html">Rules</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="dashboard.html" class="btn btn-secondary btn-sm" style="color:var(--color-primary);">Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div id="trail-wrapper" class="trail-grid-wrapper">
+    </div>
+    <div class="hero-content" style="max-width: 1200px; position: relative; z-index: 1;">
+      <div class="hero-tag">Silicon Circle Presents</div>
+      <h1>The Ultimate <span class="gradient-text">Teen Innovation</span> Hackathon</h1>
+      <p class="lead">
+        Join Chennai's first city-wide hackathon designed for Grade 8 to Grade 12 innovators. Design, pitch, or prototype STEM solutions to local and global challenges.
+      </p>
+      <div class="hero-cta">
+        <a href="register.html" class="btn btn-primary">Register Team</a>
+        <a href="#themes" class="btn btn-secondary">Explore Themes</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Overview Section -->
+  <section class="section" id="overview" style="position: relative; overflow: hidden;">
+    <div class="grid-2" style="position: relative; z-index: 1; pointer-events: none;">
+      <div style="pointer-events: auto;">
+        <p class="hero-tag" style="background:none; border:none; padding-left:0;">01 / About HelixHack</p>
+        <h2 style="font-size:2rem; margin-bottom:1rem; font-family:var(--font-heading);">What is HelixHack?</h2>
+        <p style="color:var(--color-text-dim); margin-bottom:1rem;">
+          HelixHack is a structured, mentored, and genuinely rigorous competition designed specifically for school-age innovators. Held in Chennai, it challenges teams to develop projects within <strong>Pitch-Only</strong> (ideation-focused) or <strong>Prototype</strong> (working software/hardware) categories.
+        </p>
+        <p style="color:var(--color-text-dim);">
+          Silicon Circle is a teen-led community. We believe students do not need to wait until they graduate before making meaningful contributions to real-world problems. This hackathon is the platform we wish had existed when we started.
+        </p>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; justify-content:center; gap:1rem; pointer-events: auto;">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+          <span style="color:var(--color-text-muted);">Event Format</span>
+          <span style="font-weight:600;">Qualifying + Offline Finale</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+          <span style="color:var(--color-text-muted);">Location</span>
+          <span style="font-weight:600;">Chennai, India</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+          <span style="color:var(--color-text-muted);">Eligibility</span>
+          <span style="font-weight:600;">Grades 8 to 12</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--color-text-muted);">Team Size</span>
+          <span style="font-weight:600;">2 to 5 Members</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Themes Section -->
+  <section class="section" id="themes">
+    <div class="section-header">
+      <p class="hero-tag" style="background:none; border:none;">02 / Core Focus Areas</p>
+      <h2>Hackathon Themes</h2>
+      <p>All projects must address a problem in one of these four broad domains.</p>
+    </div>
+    <div class="grid-4">
+      <!-- Theme 1 -->
+      <div class="card theme-card">
+        <div class="theme-icon">🤖</div>
+        <h3>AI & Emerging Tech</h3>
+        <p>Projects exploring AI, machine learning, computer vision, or robotics to automate and solve practical, real-world issues.</p>
+        <span style="font-size:0.75rem; color:var(--color-primary); margin-top:1rem; font-weight:600;">E.g. Tamil language AI assistants, automated sorting.</span>
+      </div>
+      <!-- Theme 2 -->
+      <div class="card theme-card">
+        <div class="theme-icon">🌱</div>
+        <h3>Sustainability & Climate</h3>
+        <p>Environmental preservation, renewable energy, climate resilience, conservation, or waste optimization systems.</p>
+        <span style="font-size:0.75rem; color:var(--color-primary); margin-top:1rem; font-weight:600;">E.g. Rainwater monitoring, carbon tracking.</span>
+      </div>
+      <!-- Theme 3 -->
+      <div class="card theme-card">
+        <div class="theme-icon">🧠</div>
+        <h3>Wellbeing & EdTech</h3>
+        <p>Tackling student mental health challenges, emotional wellbeing, stress support systems, and learning platform innovations.</p>
+        <span style="font-size:0.75rem; color:var(--color-primary); margin-top:1rem; font-weight:600;">E.g. Peer-support forums, study schedulers.</span>
+      </div>
+      <!-- Theme 4 -->
+      <div class="card theme-card">
+        <div class="theme-icon">♿</div>
+        <h3>Accessibility & Inclusion</h3>
+        <p>Removing learning, economic, linguistic, and physical barriers to ensure full societal participation for everyone.</p>
+        <span style="font-size:0.75rem; color:var(--color-primary); margin-top:1rem; font-weight:600;">E.g. Assistive devices, sign translators.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="section" id="timeline" data-feature="timeline_visible">
+    <div class="section-header">
+      <p class="hero-tag" style="background:none; border:none;">03 / Major Milestones</p>
+      <h2>Event Timeline</h2>
+      <p>Key dates for registration, qualifiers, and the offline finale demo day.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 22, 2026</div>
+        <div class="timeline-title">Registrations Open</div>
+        <div class="timeline-desc">Registration opens online for all Grade 8-12 teams in Chennai. No entry fees for online qualifiers.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 23, 2026</div>
+        <div class="timeline-title">Mandatory Info Session</div>
+        <div class="timeline-desc">A live Google Meet walking through the rules, categories, Discord server onboarding, and logs.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 25, 2026</div>
+        <div class="timeline-title">Registrations Close</div>
+        <div class="timeline-desc">Final deadline to register. Following closing, the round schedule is distributed to all teams.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 26 - 28, 2026</div>
+        <div class="timeline-title">Round 1 Qualifying</div>
+        <div class="timeline-desc">Asynchronous written submissions (Path B) or GMeet pitch presentation to industry judges (Path A).</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 29 - Oct 17, 2026</div>
+        <div class="timeline-title">The Build Period</div>
+        <div class="timeline-desc">Finalist teams refine their ideas or code their applications, uploading daily progress logs to Discord.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Oct 18, 2026</div>
+        <div class="timeline-title">Finale Demo Day</div>
+        <div class="timeline-desc">A school-holiday exhibition day in Chennai. Stall-based format, Q&A rounds, and prize distributions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prizes Section -->
+  <section class="section" id="prizes">
+    <div class="section-header">
+      <p class="hero-tag" style="background:none; border:none;">04 / Rewards</p>
+      <h2>Prizes & Categories</h2>
+      <p>Earn awards, cash prizes, certificates, and long-term industry connections.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="border-color: rgba(234, 179, 8, 0.4); text-align:center;">
+        <span style="font-size:2rem;">🏆</span>
+        <h3 style="font-family:var(--font-heading); font-size:1.4rem; margin:0.5rem 0;">1st Place</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1rem;">
+          Top honors, cash prize, winner trophy, certificate, joint recognition letter, and direct **structured incubation access / industry mentorship**.
+        </p>
+      </div>
+      <div class="card" style="border-color: rgba(148, 163, 184, 0.4); text-align:center;">
+        <span style="font-size:2rem;">🥈</span>
+        <h3 style="font-family:var(--font-heading); font-size:1.4rem; margin:0.5rem 0;">2nd Place</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1rem;">
+          Runner-up cash rewards, trophy, certificates of placement, and a joint letter of recognition useful for portfolios.
+        </p>
+      </div>
+      <div class="card" style="border-color: rgba(180, 83, 9, 0.4); text-align:center;">
+        <span style="font-size:2rem;">🥉</span>
+        <h3 style="font-family:var(--font-heading); font-size:1.4rem; margin:0.5rem 0;">3rd Place</h3>
+        <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1rem;">
+          Third place cash awards, placement trophy, and certificates of accomplishment.
+        </p>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:2rem;">
+      <div class="card">
+        <h4 style="font-family:var(--font-heading); margin-bottom:0.5rem;">Special Awards</h4>
+        <ul style="list-style:none; padding-left:0; color:var(--color-text-dim); font-size:0.9rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li>🌟 <strong>People's Choice:</strong> Determined by social media engagement.</li>
+          <li>⚡ <strong>Best STEM Implementation:</strong> Most mathematically or scientifically rigorous design.</li>
+          <li>🎪 <strong>Best Stall Award:</strong> Creative visual display and stall defense.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="font-family:var(--font-heading); margin-bottom:0.5rem;">School Cup & Fellows</h4>
+        <ul style="list-style:none; padding-left:0; color:var(--color-text-dim); font-size:0.9rem; display:flex; flex-direction:column; gap:0.5rem;">
+          <li>🏫 <strong>The School Cup:</strong> Awarded to the school scoring highest across all registered teams.</li>
+          <li>🤝 <strong>Silicon Circle Fellows:</strong> Recognition, mentorship, and community membership for promising non-finalists.</li>
+          <li>📜 <strong>Participation:</strong> Every registered participant receives a certificate.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="section" id="faqs">
+    <div class="section-header">
+      <p class="hero-tag" style="background:none; border:none;">05 / Support</p>
+      <h2>Frequently Asked Questions</h2>
+      <p>Everything you need to know about the registration, evaluation, and policies.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question">Who is eligible to participate?</button>
+        <div class="faq-answer">
+          Students currently enrolled in Grade 8 through Grade 12 in Chennai schools. Independent teens not enrolled in a school are also eligible to register. All teams must have 2 to 5 members.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">What is the AI tool policy?</button>
+        <div class="faq-answer">
+          AI tools (Copilot, Cursor, ChatGPT, etc.) are allowed for coding, refactoring, asset building, and research. However, AI is NOT permitted to write your core innovation or problem statements. Additionally, every team member must be able to thoroughly explain all code and design decisions during judging.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">How does judging work?</button>
+        <div class="faq-answer">
+          Judging is worth 100 points: Innovation & Originality (25), STEM Integration (20), Feasibility (20), Impact (15), Execution Quality (10), and Presentation (10) + a 5-point bonus for consistent daily Discord logging.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Are there any fees?</button>
+        <div class="faq-answer">
+          Registration and Round 1 qualifying are completely free. If your team advances to the offline finale, a registration fee is required to cover venue entry, lunch, and amenities.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="section" style="padding:3rem 2rem 2rem 2rem; border-top:1px solid var(--border-glass); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+    <p style="font-size:0.85rem; color:var(--color-text-muted);">
+      &copy; 2026 HelixHack. Organized by Silicon Circle.
+    </p>
+    <p style="font-size:0.85rem; color:var(--color-text-muted);">
+      system: [online] 🧬 <a href="#" id="easter-egg-trigger" style="color:var(--color-text-muted); text-decoration:none;">[decrypt_logs]</a>
+    </p>
+  </footer>
+</body>
+</html>

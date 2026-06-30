@@ -20,6 +20,7 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState<ProjectForm>({ title: '', description: '', tech: '', url: '', image: null })
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const allTech = Array.from(new Set(mockProjects.flatMap(p => p.tech)))
@@ -29,10 +30,21 @@ export default function ProjectsPage() {
     return techMatch && searchMatch
   })
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setForm({ ...form, image: file })
+      const reader = new FileReader()
+      reader.onload = () => setImagePreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSubmit = () => {
     if (form.title && form.description) {
       alert(`Project "${form.title}" uploaded! (mock)`)
       setForm({ title: '', description: '', tech: '', url: '', image: null })
+      setImagePreview(null)
       setShowModal(false)
     }
   }
@@ -162,6 +174,26 @@ export default function ProjectsPage() {
                   placeholder="React, Next.js, etc..."
                   className="input w-full"
                 />
+              </div>
+
+              <div>
+                <p className="text-xs text-[var(--muted)] mb-1">Thumbnail Image</p>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-secondary text-sm py-2 px-4"
+                >
+                  Choose Image
+                </button>
+                {imagePreview && (
+                  <img src={imagePreview} alt="Preview" className="mt-2 max-h-32 object-contain" />
+                )}
               </div>
 
               <div>

@@ -18,6 +18,7 @@ export default function CollabPage() {
   const [visible, setVisible] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState<IdeaForm>({ title: '', description: '', problem: '', solution: '', image: null })
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -32,10 +33,21 @@ export default function CollabPage() {
     return comments.length + comments.reduce((acc, c) => acc + (mockIdeaComments[c.id]?.length || 0), 0)
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setForm({ ...form, image: file })
+      const reader = new FileReader()
+      reader.onload = () => setImagePreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSubmit = () => {
     if (form.title && form.description && form.problem && form.solution) {
       alert(`Idea "${form.title}" shared! (mock)`)
-      setForm({ title: '', description: '', problem: '', solution: '' })
+      setForm({ title: '', description: '', problem: '', solution: '', image: null })
+      setImagePreview(null)
       setShowModal(false)
     }
   }
@@ -157,30 +169,33 @@ export default function CollabPage() {
 
               <div>
                 <p className="text-xs text-[var(--muted)] mb-1">Solution</p>
-<textarea
-                   value={form.solution}
-                   onChange={(e) => setForm({ ...form, solution: e.target.value })}
-                   placeholder="How would you solve it?"
-                   className="input w-full h-24 resize-none"
-                 />
+                <textarea
+                  value={form.solution}
+                  onChange={(e) => setForm({ ...form, solution: e.target.value })}
+                  placeholder="How would you solve it?"
+                  className="input w-full h-24 resize-none"
+                />
               </div>
 
               <div>
-                 <p className="text-xs text-[var(--muted)] mb-1">Sketch/Draft (optional)</p>
-                 <input
-                   type="file"
-                   ref={fileInputRef}
-                   onChange={(e) => setForm({ ...form, image: e.target.files?.[0] || null })}
-                   accept="image/*"
-                   className="hidden"
-                 />
-                 <button
-                   onClick={() => fileInputRef.current?.click()}
-                   className="btn-secondary text-sm py-2 px-4 w-full"
-                 >
-                   {form.image ? `[selected: ${form.image.name}]` : '[add sketch or draft]'}
-                 </button>
-               </div>
+                <p className="text-xs text-[var(--muted)] mb-1">Sketch/Draft Image</p>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-secondary text-sm py-2 px-4 w-full"
+                >
+                  {form.image ? `[selected: ${form.image.name}]` : '[add sketch or draft]'}
+                </button>
+                {imagePreview && (
+                  <img src={imagePreview} alt="Preview" className="mt-2 max-h-32 object-contain" />
+                )}
+              </div>
 
               <div className="flex gap-2 pt-4">
                 <button onClick={handleSubmit} className="btn-primary flex-1">
