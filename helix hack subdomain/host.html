@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; img-src 'self' data: https:; frame-ancestors 'none';">
   <title>Host Dashboard - HelixHack 2026</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css?v=3">
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,7 +42,7 @@
       <form onsubmit="handleHostLogin(event)">
         <div class="form-group">
           <label class="form-label" for="host-email">Host Email</label>
-          <input type="email" id="host-email" class="form-input" value="admin@helixhack.com" required />
+          <input type="email" id="host-email" class="form-input" placeholder="admin@helixhack.com" required />
         </div>
         <div class="form-group">
           <label class="form-label" for="passcode">Password / Passcode</label>
@@ -182,29 +185,12 @@
           err.style.display = "none";
           await loadHostConsole();
         } else {
-          // Fallback check for local testing: allow admin@helixhack.com / admin123
-          if (email === "admin@helixhack.com" && password === "admin123") {
-            console.warn("Using fallback credentials. For production security, please configure users in Supabase Auth.");
-            document.getElementById("host-auth").style.display = "none";
-            document.getElementById("host-interface").style.display = "grid";
-            err.style.display = "none";
-            await loadHostConsole();
-          } else {
-            err.innerText = error ? error.message : "Invalid credentials. Please try again.";
-            err.style.display = "block";
-          }
-        }
-      } catch (err2) {
-        // Safe catch if window.supabase fails or fails to connect
-        if (email === "admin@helixhack.com" && password === "admin123") {
-          document.getElementById("host-auth").style.display = "none";
-          document.getElementById("host-interface").style.display = "grid";
-          err.style.display = "none";
-          await loadHostConsole();
-        } else {
-          err.innerText = "Error connecting to authentication server. Please try again.";
+          err.innerText = error ? error.message : "Invalid credentials. Please try again.";
           err.style.display = "block";
         }
+      } catch (err2) {
+        err.innerText = "Error connecting to authentication server. Please try again.";
+        err.style.display = "block";
       }
     }
 
@@ -222,11 +208,21 @@
           btn.style.border = "none";
           btn.style.background = "transparent";
           btn.style.cursor = "pointer";
-          
-          btn.innerHTML = `
-            <div style="font-weight:600; color:var(--color-text-main);">${t.name}</div>
-            <div style="font-size:0.75rem; font-family:monospace; color:var(--color-primary);">${t.id} &bull; Score: ${t.scores?.total || 0}</div>
-          `;
+
+          // Build DOM safely — never set .innerHTML with untrusted database values
+          const nameDiv = document.createElement('div');
+          nameDiv.style.fontWeight = '600';
+          nameDiv.style.color = 'var(--color-text-main)';
+          nameDiv.textContent = t.name; // safe: textContent escapes HTML
+
+          const metaDiv = document.createElement('div');
+          metaDiv.style.fontSize = '0.75rem';
+          metaDiv.style.fontFamily = 'monospace';
+          metaDiv.style.color = 'var(--color-primary)';
+          metaDiv.textContent = `${t.id} • Score: ${t.scores?.total || 0}`;
+
+          btn.appendChild(nameDiv);
+          btn.appendChild(metaDiv);
 
           btn.addEventListener("click", () => {
             document.querySelectorAll(".sidebar-link").forEach(x => x.classList.remove("active"));

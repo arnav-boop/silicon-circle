@@ -93,13 +93,13 @@ export default function HostHackathonPage() {
     return (
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
         <div className="mb-4">
-          <Link href="/hackathons" className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
+          <Link href="/hackathons" className="text-sm sm:text-base text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
             ← back to hackathons
           </Link>
         </div>
         <div className="p-6 border border-[var(--border)] rounded text-center">
-          <p className="text-sm text-[var(--muted)] mb-4">Login to host hackathons</p>
-          <Link href="/login" className="btn-primary text-sm py-2 px-4 inline-block">[login to host]</Link>
+          <p className="text-base text-[var(--muted)] mb-4">Login to host hackathons</p>
+          <Link href="/login" className="btn-primary text-base py-2.5 px-5 inline-block">[login to host]</Link>
         </div>
       </div>
     )
@@ -108,43 +108,43 @@ export default function HostHackathonPage() {
   return (
     <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-4">
-        <Link href="/hackathons" className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
+        <Link href="/hackathons" className="text-sm sm:text-base text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors">
           ← back to hackathons
         </Link>
       </div>
 
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs text-[var(--muted)] mb-1">{'>'} host_hackathon_module</p>
-        <h1 className="text-2xl sm:text-3xl font-bold glow">Host Hackathon_</h1>
-        <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Create your own hackathon event</p>
+        <p className="text-sm text-[var(--muted)] mb-1">{'>'} host_hackathon_module</p>
+        <h1 className="text-3xl sm:text-4xl font-bold glow">Host Hackathon_</h1>
+        <p className="text-base sm:text-lg text-[var(--foreground-dim)] mt-2">Create your own hackathon event</p>
       </div>
 
       <div className="space-y-6">
-        <div className="card p-4 sm:p-5">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-3">What is it about?</p>
+        <div className="card p-5 sm:p-6">
+          <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mb-3">What is it about?</p>
           <textarea
             value={about}
             onChange={(e) => setAbout(e.target.value)}
             placeholder="Describe what your hackathon focuses on, what problems participants will solve..."
-            className="input w-full h-24 resize-none"
+            className="input w-full h-28 resize-none text-base"
           />
         </div>
 
-        <div className="card p-4 sm:p-5">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-3">Theme</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="card p-5 sm:p-6">
+          <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider mb-3">Theme</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             {themes.map((t) => (
               <button
                 key={t.value}
                 onClick={() => setTheme(t.value)}
-                className={`p-3 border text-left transition-all ${
+                className={`p-3 sm:p-4 border text-left transition-all ${
                   theme === t.value
                     ? 'border-[var(--foreground)] bg-[var(--foreground)]/10'
                     : 'border-[var(--border)] hover:border-[var(--foreground-dim)]'
                 }`}
               >
-                <span className="text-lg mr-2">{t.icon}</span>
-                <span className="text-xs">{t.label}</span>
+                <span className="text-xl mr-2">{t.icon}</span>
+                <span className="text-sm sm:text-base">{t.label}</span>
               </button>
             ))}
           </div>
@@ -153,27 +153,27 @@ export default function HostHackathonPage() {
         <button
           onClick={generateHackathonInfo}
           disabled={!about || !theme}
-          className="btn-primary w-full"
+          className="btn-primary w-full text-base py-3"
         >
           [generate hackathon info]
         </button>
 
         {generatedInfo && (
-          <div className="card p-4 sm:p-5 space-y-4">
-            <p className="text-xs text-[var(--muted)] uppercase tracking-wider">Generated Details</p>
+          <div className="card p-5 sm:p-6 space-y-4">
+            <p className="text-sm font-bold text-[var(--muted)] uppercase tracking-wider">Generated Details</p>
 
             <div>
-              <p className="text-xs text-[var(--muted)] mb-1">Title</p>
+              <p className="text-sm text-[var(--muted)] mb-1">Title</p>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="input w-full"
+                className="input w-full text-base"
               />
             </div>
 
             <div>
-              <p className="text-xs text-[var(--muted)] mb-1">Date</p>
+              <p className="text-sm text-[var(--muted)] mb-1">Date</p>
               <input
                 type="date"
                 value={date}

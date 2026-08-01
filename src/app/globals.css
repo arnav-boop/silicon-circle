@@ -9,9 +9,9 @@
   --muted: #15803d;
   --accent: #22c55e;
   --cursor-blink: #22c55e;
-  --font-size-body: 16px;
-  --font-size-button: 16px;
-  --font-size-input: 16px;
+  --font-size-body: 18px;
+  --font-size-button: 18px;
+  --font-size-input: 18px;
 }
 
 @theme inline {
@@ -33,7 +33,7 @@
 html {
   scrollbar-width: thin;
   scrollbar-color: var(--foreground-dim) var(--background);
-  font-size: var(--font-size-body, 16px);
+  font-size: var(--font-size-body, 18px);
 }
 
 body {
@@ -41,13 +41,13 @@ body {
   color: var(--foreground);
   font-family: var(--font-mono);
   min-height: 100vh;
-  line-height: 1.5;
-  font-size: 1rem;
+  line-height: 1.6;
+  font-size: 1.125rem;
 }
 
 @media (max-width: 768px) {
   html {
-    font-size: calc(var(--font-size-body, 16px) * 0.85);
+    font-size: calc(var(--font-size-body, 18px) * 0.95);
   }
 }
 
@@ -93,8 +93,8 @@ body::before {
   cursor: pointer;
   border: none;
   font-family: var(--font-mono);
-  font-size: var(--font-size-button, 16px);
-  line-height: 1;
+  font-size: var(--font-size-button, 18px);
+  line-height: 1.2;
 }
 
 .btn-secondary {
@@ -107,8 +107,8 @@ body::before {
   cursor: pointer;
   border: 1px solid var(--foreground);
   font-family: var(--font-mono);
-  font-size: var(--font-size-button, 16px);
-  line-height: 1;
+  font-size: var(--font-size-button, 18px);
+  line-height: 1.2;
 }
 
 .btn-primary:hover {
@@ -128,7 +128,7 @@ body::before {
   color: var(--foreground);
   padding: 12px 16px;
   border-radius: 2px;
-  font-size: var(--font-size-input, 16px);
+  font-size: var(--font-size-input, 18px);
   transition: all 0.2s ease;
   width: 100%;
   font-family: var(--font-mono);

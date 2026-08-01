@@ -25,6 +25,28 @@ const GOOGLE_FORM_CONFIG = {
   }
 };
 
+// ─── Input Helpers ──────────────────────────────────────────────
+/**
+ * Strip leading/trailing whitespace and truncate to maxLen chars.
+ * Removes control characters to prevent injection via text fields.
+ */
+function sanitizeText(value, maxLen = 200) {
+  if (typeof value !== 'string') return '';
+  // Remove null bytes and other dangerous control characters
+  return value.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLen);
+}
+
+/** Basic RFC-5322-ish email check */
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/** Accepts digits, spaces, +, -, (, ) — rejects everything else */
+function validatePhone(phone) {
+  if (!phone) return true; // phone is optional
+  return /^[\d\s()\-+]{7,20}$/.test(phone);
+}
+
 // ─── Feature Flags ──────────────────────────────────────────────
 class FeatureFlags {
   constructor() {
@@ -35,7 +57,7 @@ class FeatureFlags {
     const { data, error } = await supabaseClient
       .from('feature_flags')
       .select('*');
-    if (error) { console.error('FeatureFlags.getAll error:', error); return []; }
+    if (error) { console.error('FeatureFlags.getAll: fetch failed'); return []; }
     this._cache = data;
     return data;
   }
@@ -51,7 +73,7 @@ class FeatureFlags {
       .from('feature_flags')
       .update({ enabled })
       .eq('key', key);
-    if (error) { console.error('FeatureFlags.set error:', error); return false; }
+    if (error) { console.error('FeatureFlags.set: update failed'); return false; }
     if (this._cache) {
       const f = this._cache.find(f => f.key === key);
       if (f) f.enabled = enabled;
@@ -68,7 +90,7 @@ class HelixSupabase {
       .from('teams')
       .select('*, scores(*)')
       .order('created_at', { ascending: false });
-    if (error) { console.error('getTeams error:', error); return []; }
+    if (error) { console.error('getTeams: fetch failed'); return []; }
     // Flatten scores into team object for backward compat
     return data.map(t => ({
       ...t,
@@ -82,7 +104,7 @@ class HelixSupabase {
       .select('*, scores(*)')
       .ilike('id', id.trim())
       .single();
-    if (error) { console.error('getTeam error:', error); return null; }
+    if (error) { console.error('getTeam: fetch failed'); return null; }
 
     // Query confirmed days to populate streak
     const confirmedDays = await this.getConfirmedDays(data.id);
@@ -101,7 +123,7 @@ class HelixSupabase {
       .select('*')
       .eq('team_id', teamId)
       .order('date', { ascending: false });
-    if (error) { console.error('getTeamLogs error:', error); return []; }
+    if (error) { console.error('getTeamLogs: fetch failed'); return []; }
     return data;
   }
 
@@ -111,38 +133,93 @@ class HelixSupabase {
       .select('date')
       .eq('team_id', teamId)
       .eq('confirmed', true);
-    if (error) { console.error('getConfirmedDays error:', error); return []; }
+    if (error) { console.error('getConfirmedDays: fetch failed'); return []; }
     return data.map(l => l.date);
   }
 
   // --- Registration ---
   async registerTeam(teamData) {
-    const uniqueId = "HH26-" + Math.floor(1000 + Math.random() * 9000);
+    // ── Input validation ──────────────────────────────────────
+    const name        = sanitizeText(teamData.name, 100);
+    const school      = sanitizeText(teamData.school, 150);
+    const leaderName  = sanitizeText(teamData.leaderName, 100);
+    const leaderEmail = sanitizeText(teamData.leaderEmail, 254);
+    const leaderPhone = sanitizeText(teamData.leaderPhone || '', 30);
+    const category    = teamData.category;
+    const theme       = teamData.theme;
+
+    if (!name || !school || !leaderName) {
+      console.warn('registerTeam: required text fields missing');
+      return null;
+    }
+    if (!validateEmail(leaderEmail)) {
+      console.warn('registerTeam: invalid leader email format');
+      return null;
+    }
+    if (!validatePhone(leaderPhone)) {
+      console.warn('registerTeam: invalid leader phone format');
+      return null;
+    }
+    // Whitelist category and theme to prevent arbitrary values
+    const VALID_CATEGORIES = ['pitch-only', 'prototype'];
+    const VALID_THEMES = ['ai', 'sustainability', 'wellbeing', 'accessibility'];
+    if (!VALID_CATEGORIES.includes(category)) {
+      console.warn('registerTeam: invalid category value');
+      return null;
+    }
+    if (!VALID_THEMES.includes(theme)) {
+      console.warn('registerTeam: invalid theme value');
+      return null;
+    }
+
+    // Sanitize members array
+    const members = (teamData.members || []).map(m => ({
+      name:  sanitizeText(typeof m === 'object' ? m.name  : m, 100),
+      email: sanitizeText(typeof m === 'object' ? m.email : '',  254),
+      phone: sanitizeText(typeof m === 'object' ? m.phone : '',  30)
+    }));
+
+    // ── ID generation with collision retry ───────────────────
+    // 9000 possible short IDs can collide at scale; retry up to 5 times
+    // then fall back to a UUID-derived suffix for guaranteed uniqueness.
+    let uniqueId;
+    let attempts = 0;
+    while (attempts < 5) {
+      const candidate = 'HH26-' + Math.floor(1000 + Math.random() * 9000);
+      const { data: existing } = await supabaseClient
+        .from('teams').select('id').eq('id', candidate).maybeSingle();
+      if (!existing) { uniqueId = candidate; break; }
+      attempts++;
+    }
+    if (!uniqueId) {
+      // Fallback: use last 8 hex chars of a random UUID for uniqueness
+      uniqueId = 'HH26-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
+    }
 
     // Insert team
     const { error: teamError } = await supabaseClient
       .from('teams')
       .insert({
         id: uniqueId,
-        name: teamData.name,
-        category: teamData.category,
-        theme: teamData.theme,
-        school: teamData.school,
-        leader_name: teamData.leaderName,
-        leader_email: teamData.leaderEmail,
-        leader_phone: teamData.leaderPhone || '',
-        members: teamData.members,
+        name,
+        category,
+        theme,
+        school,
+        leader_name:  leaderName,
+        leader_email: leaderEmail,
+        leader_phone: leaderPhone,
+        members,
         submissions: {},
         status: 'registered',
         feedback: 'Your project has been successfully registered. Submit your Round 1 details to begin evaluation.'
       });
-    if (teamError) { console.error('registerTeam error:', teamError); return null; }
+    if (teamError) { console.error('registerTeam: team insert failed'); return null; }
 
     // Insert empty scores row
     const { error: scoreError } = await supabaseClient
       .from('scores')
       .insert({ team_id: uniqueId });
-    if (scoreError) { console.error('registerTeam scores error:', scoreError); }
+    if (scoreError) { console.error('registerTeam: scores insert failed'); }
 
     // Mirror to Google Form in the background if configured
     try {
@@ -150,18 +227,18 @@ class HelixSupabase {
         // Google Forms requires application/x-www-form-urlencoded, not multipart/form-data
         const formParams = new URLSearchParams();
         formParams.append(GOOGLE_FORM_CONFIG.entries.teamId, uniqueId);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.teamName, teamData.name);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.school, teamData.school);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.category, teamData.category);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.theme, teamData.theme);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderName, teamData.leaderName);
-        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderEmail, teamData.leaderEmail);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.teamName, name);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.school, school);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.category, category);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.theme, theme);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderName, leaderName);
+        formParams.append(GOOGLE_FORM_CONFIG.entries.leaderEmail, leaderEmail);
         if (GOOGLE_FORM_CONFIG.entries.leaderPhone && !GOOGLE_FORM_CONFIG.entries.leaderPhone.includes('XXXXXXX')) {
-          formParams.append(GOOGLE_FORM_CONFIG.entries.leaderPhone, teamData.leaderPhone);
+          formParams.append(GOOGLE_FORM_CONFIG.entries.leaderPhone, leaderPhone);
         }
 
         // Handle both simple string arrays and object arrays for members safely
-        const membersStr = (teamData.members || []).map(m => {
+        const membersStr = members.map(m => {
           if (typeof m === 'object' && m !== null) {
             return `${m.name} (${m.email || 'No email'}${m.phone ? `, ${m.phone}` : ''})`;
           }
@@ -193,7 +270,7 @@ class HelixSupabase {
       .from('teams')
       .update({ submissions: submission, status: 'submitted' })
       .eq('id', teamId);
-    if (error) { console.error('submitProject error:', error); return false; }
+    if (error) { console.error('submitProject: update failed'); return false; }
     return true;
   }
 
@@ -210,7 +287,7 @@ class HelixSupabase {
         image_url: imageUrl,
         confirmed: false
       });
-    if (error) { console.error('addProgressLog error:', error); return null; }
+    if (error) { console.error('addProgressLog: insert failed'); return null; }
 
     // Recalculate bonus based on confirmed days
     await this._recalcBonus(teamId);
@@ -243,14 +320,14 @@ class HelixSupabase {
         bonus: bonus,
         total: total
       });
-    if (scoreError) console.error('updateTeamFromHost scores error:', scoreError);
+    if (scoreError) console.error('updateTeamFromHost: scores upsert failed');
 
     // Update team status and feedback
     const { error: teamError } = await supabaseClient
       .from('teams')
       .update({ feedback: feedback || '', status: status || 'registered' })
       .eq('id', teamId);
-    if (teamError) console.error('updateTeamFromHost team error:', teamError);
+    if (teamError) console.error('updateTeamFromHost: team update failed');
 
     // Update log confirmations
     if (confirmedDays && confirmedDays.length > 0) {

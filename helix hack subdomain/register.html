@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://docs.google.com; img-src 'self' data: https:; frame-ancestors 'none';">
   <title>Register - HelixHack 2026</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css?v=3">
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -45,11 +48,11 @@
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label" for="teamName">Team Name</label>
-            <input type="text" id="teamName" class="form-input" placeholder="Enter team name" required />
+            <input type="text" id="teamName" class="form-input" placeholder="Enter team name" maxlength="100" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="school">School Name</label>
-            <input type="text" id="school" class="form-input" placeholder="e.g. DAV Mogappair or Independent" required />
+            <input type="text" id="school" class="form-input" placeholder="e.g. DAV Mogappair or Independent" maxlength="150" required />
           </div>
         </div>
 
@@ -80,15 +83,15 @@
         <div class="grid-3">
           <div class="form-group">
             <label class="form-label" for="leaderName">Full Name</label>
-            <input type="text" id="leaderName" class="form-input" placeholder="Leader full name" required />
+            <input type="text" id="leaderName" class="form-input" placeholder="Leader full name" maxlength="100" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="leaderEmail">Email Address</label>
-            <input type="email" id="leaderEmail" class="form-input" placeholder="leader@example.com" required />
+            <input type="email" id="leaderEmail" class="form-input" placeholder="leader@example.com" maxlength="254" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="leaderPhone">Phone Number</label>
-            <input type="tel" id="leaderPhone" class="form-input" placeholder="e.g. +91 98765 43210" required />
+            <input type="tel" id="leaderPhone" class="form-input" placeholder="e.g. +91 98765 43210" maxlength="20" pattern="[\d\s()\-+]{7,20}" title="Enter a valid phone number (7-20 digits, spaces, +, -, parentheses allowed)" required />
           </div>
         </div>
 
@@ -103,15 +106,15 @@
           <div class="member-row grid-3" style="margin-bottom:1rem;">
             <div class="form-group">
               <label class="form-label">Member 2 Name</label>
-              <input type="text" class="form-input member-name" placeholder="Member 2 full name" required />
+              <input type="text" class="form-input member-name" placeholder="Member 2 full name" maxlength="100" required />
             </div>
             <div class="form-group">
               <label class="form-label">Member 2 Email</label>
-              <input type="email" class="form-input member-email" placeholder="member2@example.com" required />
+              <input type="email" class="form-input member-email" placeholder="member2@example.com" maxlength="254" required />
             </div>
             <div class="form-group">
               <label class="form-label">Member 2 Phone</label>
-              <input type="tel" class="form-input member-phone" placeholder="e.g. +91 98765 43210" required />
+              <input type="tel" class="form-input member-phone" placeholder="e.g. +91 98765 43210" maxlength="20" pattern="[\d\s()\-+]{7,20}" title="Enter a valid phone number" required />
             </div>
           </div>
         </div>
@@ -178,15 +181,15 @@
       div.innerHTML = `
         <div class="form-group">
           <label class="form-label">Member ${memberCount} Name</label>
-          <input type="text" class="form-input member-name" placeholder="Member ${memberCount} full name" required />
+          <input type="text" class="form-input member-name" placeholder="Member ${memberCount} full name" maxlength="100" required />
         </div>
         <div class="form-group">
           <label class="form-label">Member ${memberCount} Email</label>
-          <input type="email" class="form-input member-email" placeholder="member${memberCount}@example.com" required />
+          <input type="email" class="form-input member-email" placeholder="member${memberCount}@example.com" maxlength="254" required />
         </div>
         <div class="form-group">
           <label class="form-label">Member ${memberCount} Phone</label>
-          <input type="tel" class="form-input member-phone" placeholder="e.g. +91 98765 43210" required />
+          <input type="tel" class="form-input member-phone" placeholder="e.g. +91 98765 43210" maxlength="20" pattern="[\\d\\s()\\-+]{7,20}" title="Enter a valid phone number" required />
         </div>
       `;
       list.appendChild(div);

@@ -114,25 +114,25 @@ export default function FriendsPage() {
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs text-[var(--muted)] mb-1">{'>'} friends_module</p>
-        <h1 className="text-2xl sm:text-3xl font-bold glow">Friends_</h1>
+        <p className="text-sm text-[var(--muted)] mb-1">{'>'} friends_module</p>
+        <h1 className="text-3xl sm:text-4xl font-bold glow">Friends_</h1>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Left: Friends list & requests */}
         <div className="space-y-4">
           {/* Add friend */}
-          <div className="card p-4">
-            <h3 className="font-bold mb-2 glow-subtle">Add Friend</h3>
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-3 glow-subtle">Add Friend</h3>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={searchUsername}
                 onChange={(e) => setSearchUsername(e.target.value)}
                 placeholder="Enter username..."
-                className="input text-sm flex-1"
+                className="input text-base flex-1"
               />
-              <button onClick={handleSearch} disabled={searching} className="btn-primary text-sm">
+              <button onClick={handleSearch} disabled={searching} className="btn-primary text-base">
                 {searching ? '...' : 'Search'}
               </button>
             </div>
@@ -140,13 +140,13 @@ export default function FriendsPage() {
               <div className="mt-3 p-2 border border-[var(--border)] rounded space-y-2">
                 {searchResults.map(result => (
                   <div key={result.id} className="flex items-center justify-between">
-                    <span className="text-sm">@{result.username}</span>
+                    <span className="text-base">@{result.username}</span>
                     <button 
                       onClick={() => {
                         setSearchUsername(result.username)
                         setSearchResults([])
                       }} 
-                      className="btn-secondary text-xs py-1 px-2"
+                      className="btn-secondary text-sm py-1 px-3"
                     >
                       [Select]
                     </button>
@@ -155,10 +155,10 @@ export default function FriendsPage() {
               </div>
             )}
             {searchUsername && !searching && searchResults.length === 0 && (
-              <p className="text-sm text-[var(--muted)] mt-2">No users found</p>
+              <p className="text-base text-[var(--muted)] mt-2">No users found</p>
             )}
             {searchUsername && !searching && (
-              <button onClick={handleSendFriendRequest} className="btn-secondary text-sm mt-2 w-full">
+              <button onClick={handleSendFriendRequest} className="btn-secondary text-base mt-3 w-full">
                 [ Send Friend Request ]
               </button>
             )}
@@ -166,14 +166,14 @@ export default function FriendsPage() {
 
           {/* Friend requests */}
           {friendRequests.length > 0 && (
-            <div className="card p-4">
-              <h3 className="font-bold mb-2 glow-subtle text-[var(--accent)]">Friend Requests</h3>
+            <div className="card p-5 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 glow-subtle text-[var(--accent)]">Friend Requests</h3>
               {friendRequests.map(req => (
                 <div key={req.id} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
-                  <span>@{req.username}</span>
+                  <span className="text-base">@{req.username}</span>
                   <div className="flex gap-2">
-                    <button onClick={() => acceptFriendRequest(req.id)} className="btn-primary text-xs py-1 px-2">Accept</button>
-                    <button onClick={() => rejectFriendRequest(req.id)} className="btn-secondary text-xs py-1 px-2">Reject</button>
+                    <button onClick={() => acceptFriendRequest(req.id)} className="btn-primary text-sm py-1 px-3">Accept</button>
+                    <button onClick={() => rejectFriendRequest(req.id)} className="btn-secondary text-sm py-1 px-3">Reject</button>
                   </div>
                 </div>
               ))}
@@ -181,16 +181,16 @@ export default function FriendsPage() {
           )}
 
           {/* Friends list */}
-          <div className="card p-4">
-            <h3 className="font-bold mb-2 glow-subtle">Your Friends ({friends.length})</h3>
+          <div className="card p-5 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-3 glow-subtle">Your Friends ({friends.length})</h3>
             {friends.length === 0 ? (
-              <p className="text-sm text-[var(--muted)]">No friends yet. Add some!</p>
+              <p className="text-base text-[var(--muted)]">No friends yet. Add some!</p>
             ) : (
               friends.map(friend => (
                 <button
                   key={friend.id}
                   onClick={() => setActiveChat({ id: friend.id, username: friend.username || 'unknown' })}
-                  className={`w-full text-left py-2 border-b border-[var(--border)] hover:bg-[var(--border)] ${activeChat?.id === friend.id ? 'bg-[var(--border)]' : ''}`}
+                  className={`w-full text-left py-2.5 px-2 border-b border-[var(--border)] text-base sm:text-lg hover:bg-[var(--border)] ${activeChat?.id === friend.id ? 'bg-[var(--border)] font-bold' : ''}`}
                 >
                   @{friend.username || 'unknown'}
                 </button>
@@ -200,18 +200,18 @@ export default function FriendsPage() {
         </div>
 
         {/* Right: DM Chat */}
-        <div className="card p-4">
+        <div className="card p-5 sm:p-6">
           {activeChat ? (
             <>
-              <h3 className="font-bold mb-3 glow-subtle">Chat with @{activeChat.username}</h3>
-              <div className="h-64 overflow-y-auto space-y-2 mb-3">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 glow-subtle">Chat with @{activeChat.username}</h3>
+              <div className="h-72 overflow-y-auto space-y-2 mb-3">
                 {messages.length === 0 ? (
-                  <p className="text-sm text-[var(--muted)]">No messages yet. Say hi!</p>
+                  <p className="text-base text-[var(--muted)]">No messages yet. Say hi!</p>
                 ) : (
                   messages.map(msg => (
-                    <div key={msg.id} className={`text-sm ${msg.sender_id === user.id ? 'text-right' : 'text-left'}`}>
-                      <span className="text-[var(--muted)]">[{new Date(msg.created_at).toLocaleTimeString()}]</span>
-                      <span className={msg.sender_id === user.id ? 'text-[var(--accent)]' : 'text-[var(--foreground-dim)]'}>
+                    <div key={msg.id} className={`text-base ${msg.sender_id === user.id ? 'text-right' : 'text-left'}`}>
+                      <span className="text-sm text-[var(--muted)]">[{new Date(msg.created_at).toLocaleTimeString()}]</span>
+                      <span className={msg.sender_id === user.id ? 'text-[var(--accent)] font-medium' : 'text-[var(--foreground-dim)] font-medium'}>
                         {' '}{msg.content}
                       </span>
                     </div>
@@ -225,13 +225,13 @@ export default function FriendsPage() {
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type message..."
-                  className="input text-sm flex-1"
+                  className="input text-base flex-1"
                 />
-                <button onClick={handleSendMessage} className="btn-primary text-sm">[Send]</button>
+                <button onClick={handleSendMessage} className="btn-primary text-base">[Send]</button>
               </div>
             </>
           ) : (
-            <p className="text-center text-[var(--muted)] py-8">Select a friend to start chatting</p>
+            <p className="text-center text-[var(--muted)] text-base py-12">Select a friend to start chatting</p>
           )}
         </div>
       </div>

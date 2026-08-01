@@ -83,12 +83,12 @@ export default function CollabPage() {
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex items-center justify-between">
         <div>
-          <p className="text-xs text-[var(--muted)] mb-1">{'>'} collaboration_module</p>
-          <h1 className="text-2xl sm:text-3xl font-bold glow">Collab Ideas_</h1>
-          <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Share ideas, get feedback, build together</p>
+          <p className="text-sm text-[var(--muted)] mb-1">{'>'} collaboration_module</p>
+          <h1 className="text-3xl sm:text-4xl font-bold glow">Collab Ideas_</h1>
+          <p className="text-base sm:text-lg text-[var(--foreground-dim)] mt-2">Share ideas, get feedback, build together</p>
         </div>
         {user && (
-          <button onClick={() => setShowModal(true)} className="btn-primary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6">
+          <button onClick={() => setShowModal(true)} className="btn-primary text-base py-2.5 px-5">
             [+ submit idea]
           </button>
         )}
@@ -96,7 +96,7 @@ export default function CollabPage() {
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-[var(--muted)]">{'>'} loading collaboration ideas...</p>
+          <p className="text-base text-[var(--muted)]">{'>'} loading collaboration ideas...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -104,7 +104,7 @@ export default function CollabPage() {
             <Link
               key={idea.id}
               href={`/collab/${idea.id}`}
-              className="card p-4 sm:p-5 block group"
+              className="card p-5 sm:p-6 block group"
               style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? 'translateY(0)' : 'translateY(10px)',
@@ -118,23 +118,23 @@ export default function CollabPage() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold mb-1 glow-subtle line-clamp-1">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-1 glow-subtle line-clamp-1">
                     {idea.title}
                   </h2>
-                  <p className="text-xs sm:text-sm text-[var(--foreground-dim)] line-clamp-2 mb-3 sm:mb-4">
+                  <p className="text-base text-[var(--foreground-dim)] line-clamp-2 mb-3 sm:mb-4">
                     {idea.description}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-[var(--muted)]">
+                  <div className="flex items-center justify-between text-sm text-[var(--muted)]">
                     <span className="truncate">by @{idea.author?.username || 'anonymous'}</span>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                         </svg>
                         {idea.upvotes || 0}
                       </span>
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                         {idea.commentCount}
@@ -149,11 +149,11 @@ export default function CollabPage() {
       )}
 
       {!user && (
-        <div className="mt-8 text-center p-4 sm:p-6 border border-[var(--border)] rounded">
-          <p className="text-[var(--muted)] text-sm sm:text-base mb-3">
+        <div className="mt-8 text-center p-5 sm:p-6 border border-[var(--border)] rounded">
+          <p className="text-[var(--muted)] text-base sm:text-lg mb-3">
             Login to submit your own ideas and join the discussion
           </p>
-          <Link href="/login" className="btn-primary text-sm py-2 px-4">
+          <Link href="/login" className="btn-primary text-base py-2 px-5">
             [login to participate]
           </Link>
         </div>
@@ -163,15 +163,15 @@ export default function CollabPage() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="card p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold glow">Share Idea_</h2>
-              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)]">
+              <h2 className="text-xl sm:text-2xl font-bold glow">Share Idea_</h2>
+              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)] text-xl">
                 ✕
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Title (one-liner)</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Title (one-liner)</p>
                 <input
                   type="text"
                   value={form.title}
@@ -182,33 +182,33 @@ export default function CollabPage() {
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">One-sentence description</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Short Description</p>
                 <input
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Summarize in one sentence..."
+                  placeholder="Brief summary..."
                   className="input w-full"
                 />
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Problem</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Problem it Solves</p>
                 <textarea
                   value={form.problem}
                   onChange={(e) => setForm({ ...form, problem: e.target.value })}
-                  placeholder="What problem does it solve?"
+                  placeholder="What pain point are you addressing?"
                   className="input w-full h-20 resize-none"
                 />
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Solution</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Proposed Solution</p>
                 <textarea
                   value={form.solution}
                   onChange={(e) => setForm({ ...form, solution: e.target.value })}
-                  placeholder="How would you solve it?"
-                  className="input w-full h-24 resize-none"
+                  placeholder="How will it work?"
+                  className="input w-full h-20 resize-none"
                 />
               </div>
 

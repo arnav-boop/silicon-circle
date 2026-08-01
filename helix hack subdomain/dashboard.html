@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co; img-src 'self' data: https:; frame-ancestors 'none';">
   <title>Student Dashboard - HelixHack 2026</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css?v=3">
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -167,7 +170,7 @@
           <p style="color:var(--color-text-dim); font-size:0.9rem; margin-bottom:1rem;">
             Please post your progress logs daily to our official Discord server in the <strong>#daily-logs</strong> channel. Silicon Circle hosts will review your posts and confirm them below.
           </p>
-          <a href="https://discord.gg/siliconcircle" target="_blank" class="btn btn-primary btn-sm">Join Discord #daily-logs</a>
+          <a href="https://discord.gg/siliconcircle" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Join Discord #daily-logs</a>
         </div>
         
         <h4 style="font-family:var(--font-heading); margin-bottom:1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.25rem;">Build Period Log Calendar</h4>
@@ -358,12 +361,35 @@
       membersList.innerHTML = "";
       activeTeam.members.forEach((m, idx) => {
         const li = document.createElement("li");
+        // Build safely using textContent — never inject member data as raw HTML
         if (typeof m === 'object' && m !== null) {
-          const emailStr = m.email ? `<span style="font-size:0.8rem; color:var(--color-text-muted); margin-left: 0.5rem;">(${m.email})</span>` : '';
-          const phoneStr = m.phone ? `<span style="font-size:0.8rem; color:var(--color-accent); margin-left: 0.5rem;">📞 ${m.phone}</span>` : '';
-          li.innerHTML = `👤 Member ${idx + 1}: <strong>${m.name}</strong>${emailStr}${phoneStr}`;
+          const icon = document.createTextNode(`\uD83D\uDC64 Member ${idx + 1}: `);
+          const strong = document.createElement('strong');
+          strong.textContent = m.name || '';
+          li.appendChild(icon);
+          li.appendChild(strong);
+          if (m.email) {
+            const emailSpan = document.createElement('span');
+            emailSpan.style.fontSize = '0.8rem';
+            emailSpan.style.color = 'var(--color-text-muted)';
+            emailSpan.style.marginLeft = '0.5rem';
+            emailSpan.textContent = `(${m.email})`;
+            li.appendChild(emailSpan);
+          }
+          if (m.phone) {
+            const phoneSpan = document.createElement('span');
+            phoneSpan.style.fontSize = '0.8rem';
+            phoneSpan.style.color = 'var(--color-accent)';
+            phoneSpan.style.marginLeft = '0.5rem';
+            phoneSpan.textContent = `\uD83D\uDCDE ${m.phone}`;
+            li.appendChild(phoneSpan);
+          }
         } else {
-          li.innerHTML = `👤 Member ${idx + 1}: <strong>${m}</strong>`;
+          const icon = document.createTextNode(`\uD83D\uDC64 Member ${idx + 1}: `);
+          const strong = document.createElement('strong');
+          strong.textContent = String(m);
+          li.appendChild(icon);
+          li.appendChild(strong);
         }
         membersList.appendChild(li);
       });
@@ -377,13 +403,38 @@
       if (sub) {
         savedCard.style.display = "block";
         document.getElementById("saved-time").innerText = new Date(sub.timestamp).toLocaleString();
-        
+
+        const savedContentEl = document.getElementById("saved-content");
+        savedContentEl.innerHTML = ""; // clear
+
         if (sub.type === "link") {
-          document.getElementById("saved-content").innerHTML = `Slides Link: <a href="${sub.content}" target="_blank" style="color:var(--color-primary);">${sub.content}</a>`;
+          // Build anchor safely — never inject a URL directly into innerHTML
+          const labelText = document.createTextNode('Slides Link: ');
+          const anchor = document.createElement('a');
+          anchor.href = sub.content;       // browser will encode as needed
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer'; // prevent tab-napping
+          anchor.style.color = 'var(--color-primary)';
+          anchor.textContent = sub.content; // display the URL as plain text
+          savedContentEl.appendChild(labelText);
+          savedContentEl.appendChild(anchor);
           switchSubmissionType("link");
           document.getElementById("submit-link").value = sub.content;
         } else {
-          document.getElementById("saved-content").innerHTML = `Written Paragraph:<br><blockquote style="font-style:italic; padding-left:1rem; border-left:2px solid var(--color-secondary); color:var(--color-text-dim); margin-top:0.5rem;">"${sub.content}"</blockquote>`;
+          // Paragraph: render entirely as text, no HTML interpretation
+          const label = document.createElement('span');
+          label.textContent = 'Written Paragraph:';
+          const br = document.createElement('br');
+          const quote = document.createElement('blockquote');
+          quote.style.fontStyle = 'italic';
+          quote.style.paddingLeft = '1rem';
+          quote.style.borderLeft = '2px solid var(--color-secondary)';
+          quote.style.color = 'var(--color-text-dim)';
+          quote.style.marginTop = '0.5rem';
+          quote.textContent = `"${sub.content}"`;
+          savedContentEl.appendChild(label);
+          savedContentEl.appendChild(br);
+          savedContentEl.appendChild(quote);
           switchSubmissionType("paragraph");
           document.getElementById("submit-paragraph").value = sub.content;
           countWords();
@@ -493,9 +544,10 @@
 
       const fld = document.getElementById("scores-feedback");
       if (activeTeam.feedback) {
-        fld.innerHTML = activeTeam.feedback;
+        // Use textContent to prevent stored XSS from host-submitted feedback
+        fld.textContent = activeTeam.feedback;
       } else {
-        fld.innerHTML = "No scores or feedback are published for your team yet.";
+        fld.textContent = "No scores or feedback are published for your team yet.";
       }
     }
 

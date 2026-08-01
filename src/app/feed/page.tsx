@@ -57,13 +57,13 @@ export default function FeedPage() {
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex items-center justify-between">
         <div>
-          <p className="text-xs text-[var(--muted)] mb-1">{'>'} news_module</p>
-          <h1 className="text-2xl sm:text-3xl font-bold glow">Tech News_</h1>
+          <p className="text-sm text-[var(--muted)] mb-1">{'>'} news_module</p>
+          <h1 className="text-3xl sm:text-4xl font-bold glow">Tech News_</h1>
         </div>
         {user && (
           <button 
             onClick={() => setShowAddForm(!showAddForm)} 
-            className="btn-primary text-sm sm:text-base py-2 px-4"
+            className="btn-primary text-base py-2.5 px-5"
           >
             {showAddForm ? '[hide]' : '[+ write news]'}
           </button>
@@ -71,11 +71,11 @@ export default function FeedPage() {
       </div>
 
       {showAddForm && user && (
-        <div className="card p-4 sm:p-5 mb-6">
-          <h2 className="text-lg font-bold mb-3 glow-subtle">Post a News Update_</h2>
+        <div className="card p-5 sm:p-6 mb-6">
+          <h2 className="text-xl font-bold mb-3 glow-subtle">Post a News Update_</h2>
           <div className="space-y-4">
             <div>
-              <p className="text-xs text-[var(--muted)] mb-1">Title</p>
+              <p className="text-sm text-[var(--muted)] mb-1">Title</p>
               <input
                 type="text"
                 value={title}
@@ -85,7 +85,7 @@ export default function FeedPage() {
               />
             </div>
             <div>
-              <p className="text-xs text-[var(--muted)] mb-1">Content</p>
+              <p className="text-sm text-[var(--muted)] mb-1">Content</p>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -107,20 +107,20 @@ export default function FeedPage() {
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-[var(--muted)]">{'>'} loading news feed...</p>
+          <p className="text-base text-[var(--muted)]">{'>'} loading news feed...</p>
         </div>
       ) : (
         <div className="space-y-4">
           {posts.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">No posts shared yet.</p>
+            <p className="text-base text-[var(--muted)]">No posts shared yet.</p>
           ) : (
             posts.map((post) => (
-              <article key={post.id} className="card p-4 sm:p-5">
-                <h2 className="text-lg sm:text-xl font-bold mb-2 glow-subtle">
+              <article key={post.id} className="card p-5 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 glow-subtle">
                   {post.title}
                 </h2>
-                <p className="text-sm sm:text-base text-[var(--foreground-dim)] mb-3 sm:mb-4">{post.content}</p>
-                <div className="flex items-center gap-4 sm:gap-6 text-xs text-[var(--muted)]">
+                <p className="text-base sm:text-lg text-[var(--foreground-dim)] mb-3 sm:mb-4">{post.content}</p>
+                <div className="flex items-center gap-4 sm:gap-6 text-sm text-[var(--muted)]">
                   <span>{post.likes} likes</span>
                   <span>{post.comments} comments</span>
                   <span>

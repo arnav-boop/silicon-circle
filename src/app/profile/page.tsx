@@ -76,13 +76,13 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
-        <p className="text-xs text-[var(--muted)] mb-1">{'>'} profile_module</p>
-        <h1 className="text-xl sm:text-2xl font-bold glow">profile_</h1>
+        <p className="text-sm text-[var(--muted)] mb-1">{'>'} profile_module</p>
+        <h1 className="text-3xl sm:text-4xl font-bold glow">profile_</h1>
       </div>
 
-      <div className="card p-4 sm:p-6 space-y-4 sm:space-y-5">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-12 sm:w-16 h-12 sm:h-16 border border-[var(--border)] flex items-center justify-center text-xl sm:text-2xl font-bold glow">
+      <div className="card p-5 sm:p-7 space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-4 sm:gap-5">
+          <div className="w-14 sm:w-18 h-14 sm:h-18 border border-[var(--border)] flex items-center justify-center text-2xl sm:text-3xl font-bold glow">
             {username?.[0]?.toUpperCase() || user.email?.[0].toUpperCase()}
           </div>
           <div className="flex-1">
@@ -92,62 +92,62 @@ export default function ProfilePage() {
                   type="text"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  className="input text-sm py-1"
+                  className="input text-base py-1.5"
                   placeholder="username"
                 />
                 <button 
                   onClick={handleSaveUsername}
                   disabled={saving}
-                  className="btn-primary text-sm py-1 px-2"
+                  className="btn-primary text-base py-1.5 px-3"
                 >
                   {saving ? '...' : '✓'}
                 </button>
                 <button 
                   onClick={() => setEditingUsername(false)}
-                  className="btn-secondary text-sm py-1 px-2"
+                  className="btn-secondary text-base py-1.5 px-3"
                 >
                   ✕
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold glow-subtle">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold glow-subtle">
                   @{username || user.email?.split('@')[0]}
                 </h2>
                 <button 
                   onClick={() => setEditingUsername(true)}
-                  className="text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+                  className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] border border-[var(--border)] px-2 py-0.5 rounded"
                 >
                   edit
                 </button>
               </div>
             )}
-            <p className="text-xs text-[var(--muted)]">{user.email}</p>
+            <p className="text-sm text-[var(--muted)] mt-1">{user.email}</p>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs mb-1 text-[var(--muted)]">bio</label>
+          <label className="block text-sm sm:text-base mb-1 text-[var(--muted)]">bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="input h-20 text-sm"
+            className="input h-24 text-base"
             placeholder="about you..."
           />
         </div>
 
         <div>
-          <label className="block text-xs mb-1 text-[var(--muted)]">interests</label>
+          <label className="block text-sm sm:text-base mb-1 text-[var(--muted)]">interests</label>
           <input
             type="text"
             value={interests}
             onChange={(e) => setInterests(e.target.value)}
-            className="input text-sm"
+            className="input text-base"
             placeholder="Python, Web Dev, AI..."
           />
         </div>
 
-        <button className="btn-primary text-base w-full sm:w-auto">
+        <button className="btn-primary text-base py-3 px-6 w-full sm:w-auto">
           [ save changes ]
         </button>
       </div>

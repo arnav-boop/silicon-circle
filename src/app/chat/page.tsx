@@ -190,17 +190,17 @@ export default function ChatPage() {
       <div className="sm:hidden h-12"></div>
 
       {/* Channels sidebar */}
-      <aside className={`${showChannels ? 'flex' : 'hidden'} sm:flex w-full sm:w-56 border-r border-[var(--border)] bg-[var(--card-bg)] overflow-y-auto`}>
+      <aside className={`${showChannels ? 'flex' : 'hidden'} sm:flex w-full sm:w-64 border-r border-[var(--border)] bg-[var(--card-bg)] overflow-y-auto`}>
         <div className="p-3 sm:p-4 w-full">
-          <p className="text-xs text-[var(--muted)] mb-3">{'>'} channels</p>
+          <p className="text-sm text-[var(--muted)] mb-3">{'>'} channels</p>
           {Object.entries(groupedChannels).map(([category, channels]) => (
-            <div key={category} className="mb-3 sm:mb-4">
-              <h3 className="text-xs text-[var(--muted)] mb-1 uppercase">{category}</h3>
+            <div key={category} className="mb-4">
+              <h3 className="text-xs sm:text-sm text-[var(--muted)] mb-1 uppercase font-bold tracking-wider">{category}</h3>
               {channels.map(channel => (
                 <button
                   key={channel.id}
                   onClick={() => { setActiveChannel(channel); setShowChannels(false) }}
-                  className={`w-full text-left p-1.5 text-sm ${activeChannel.id === channel.id ? 'text-[var(--foreground)] glow-subtle' : 'text-[var(--foreground-dim)] hover:text-[var(--foreground)]'}`}
+                  className={`w-full text-left p-2 text-base rounded transition-colors ${activeChannel.id === channel.id ? 'text-[var(--foreground)] glow-subtle bg-[var(--border)]/30' : 'text-[var(--foreground-dim)] hover:text-[var(--foreground)]'}`}
                 >
                   # {channel.name}
                 </button>
@@ -212,47 +212,47 @@ export default function ChatPage() {
 
       {/* Chat area */}
       <main className="flex-1 flex flex-col">
-        <header className="p-2 sm:p-3 border-b border-[var(--border)]">
-          <p className="text-xs text-[var(--muted)]">{'//'} chat_module</p>
-          <h2 className="text-base sm:text-lg font-bold"><span className="glow"># {activeChannel.name}</span></h2>
-          {activeChannel.topic && <p className="text-xs text-[var(--muted)] hidden sm:block">{activeChannel.topic}</p>}
+        <header className="p-3 sm:p-4 border-b border-[var(--border)]">
+          <p className="text-sm text-[var(--muted)]">{'//'} chat_module</p>
+          <h2 className="text-lg sm:text-xl font-bold"><span className="glow"># {activeChannel.name}</span></h2>
+          {activeChannel.topic && <p className="text-sm text-[var(--muted)] hidden sm:block mt-0.5">{activeChannel.topic}</p>}
         </header>
 
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
           {messages.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">No messages yet. Start the conversation!</p>
+            <p className="text-base text-[var(--muted)]">No messages yet. Start the conversation!</p>
           ) : (
             messages.map(msg => (
-              <div key={msg.id} className="border border-[var(--border)] rounded p-2 sm:p-3">
+              <div key={msg.id} className="border border-[var(--border)] rounded p-3 sm:p-4">
                 {msg.reply_to_id && (
                   <button 
                     onClick={() => {
                       const originalMsg = messages.find(m => m.id === msg.reply_to_id)
                       if (originalMsg) setViewingReply(originalMsg)
                     }}
-                    className="text-xs text-[var(--accent)] mb-1 pl-2 border-l-2 border-[var(--accent)] hover:underline text-left"
+                    className="text-sm text-[var(--accent)] mb-1 pl-2 border-l-2 border-[var(--accent)] hover:underline text-left block"
                   >
                     ↩ Replying to: {msg.reply_to_content?.slice(0, 50)}...
                   </button>
                 )}
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-3">
                   <button 
                     onClick={() => handleUpvote(msg.id)}
-                    className="text-sm flex flex-col items-center min-w-[40px]"
+                    className="text-base flex flex-col items-center min-w-[40px] pt-1"
                   >
                     <span>▲</span>
-                    <span className="text-xs">{msg.upvote_count || 0}</span>
+                    <span className="text-sm font-bold">{msg.upvote_count || 0}</span>
                   </button>
                   <div className="flex-1">
-                    <div className="text-sm">
+                    <div className="text-sm sm:text-base">
                       <span className="text-[var(--muted)]">[{new Date(msg.created_at).toLocaleTimeString()}]</span>
-                      <span className="text-[var(--accent)] font-bold mx-1">{msg.sender_username || msg.sender_email?.split('@')[0] || 'user'}</span>
+                      <span className="text-[var(--accent)] font-bold mx-1.5">{msg.sender_username || msg.sender_email?.split('@')[0] || 'user'}</span>
                     </div>
-                    <div className="text-[var(--foreground)]">{msg.content}</div>
-                    {msg.attachment_url && <div className="text-xs text-[var(--accent)] mt-1">📎 {msg.attachment_url}</div>}
+                    <div className="text-[var(--foreground)] text-base sm:text-lg mt-0.5">{msg.content}</div>
+                    {msg.attachment_url && <div className="text-sm text-[var(--accent)] mt-1">📎 {msg.attachment_url}</div>}
                     <button 
                       onClick={() => setReplyingTo(msg)}
-                      className="text-xs text-[var(--muted)] mt-1 hover:text-[var(--foreground)]"
+                      className="text-sm text-[var(--muted)] mt-1.5 hover:text-[var(--foreground)]"
                     >
                       ↩ reply
                     </button>
@@ -265,17 +265,17 @@ export default function ChatPage() {
         </div>
 
         {/* Message input */}
-        <div className="p-2 sm:p-3 border-t border-[var(--border)]">
+        <div className="p-3 sm:p-4 border-t border-[var(--border)]">
           {replyingTo && (
-            <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 p-2 bg-[var(--card-bg)] rounded">
+            <div className="flex items-center justify-between text-sm text-[var(--muted)] mb-2 p-2 bg-[var(--card-bg)] rounded border border-[var(--border)]">
               <span>↩ Replying to: {replyingTo.content.slice(0, 30)}...</span>
-              <button onClick={() => setReplyingTo(null)}>✕</button>
+              <button onClick={() => setReplyingTo(null)} className="text-base px-2">✕</button>
             </div>
           )}
           <div className="flex gap-2 flex-wrap sm:flex-nowrap">
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="btn-secondary text-sm py-2 px-3"
+              className="btn-secondary text-base py-2.5 px-3"
               title="Attach file"
             >
               📎
@@ -288,10 +288,10 @@ export default function ChatPage() {
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={`Message as ${username || user?.email?.split('@')[0]}...`}
-              className="input text-sm py-2 flex-1 min-w-[150px]"
+              className="input text-base py-2.5 flex-1 min-w-[150px]"
             />
-            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="btn-secondary text-sm py-2 px-3">😊</button>
-            <button onClick={handleSendMessage} className="btn-primary text-sm py-2 px-3 sm:px-4">
+            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="btn-secondary text-base py-2.5 px-3">😊</button>
+            <button onClick={handleSendMessage} className="btn-primary text-base py-2.5 px-4 sm:px-6">
               [send]
             </button>
           </div>

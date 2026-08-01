@@ -24,7 +24,7 @@ export default function Navigation() {
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--card-bg)] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
-        <Link href="/" className="text-lg sm:text-xl font-bold glow">
+        <Link href="/" className="text-xl sm:text-2xl font-bold glow">
           Silicon Circle_
         </Link>
         
@@ -33,7 +33,7 @@ export default function Navigation() {
             <Link
               key={link.href}
               href={link.href}
-              className={`link text-sm ${pathname === link.href ? 'text-[var(--foreground-dim)]' : ''}`}
+              className={`link text-base sm:text-lg ${pathname === link.href ? 'text-[var(--foreground-dim)]' : ''}`}
             >
               {link.label}
             </Link>
@@ -43,15 +43,15 @@ export default function Navigation() {
           
           {user ? (
             <div className="flex items-center gap-3 sm:gap-4">
-              <Link href="/profile" className="link text-sm">
+              <Link href="/profile" className="link text-base">
                 Profile
               </Link>
-              <button onClick={() => signOut()} className="btn-secondary text-sm py-1.5 sm:py-2 px-3 sm:px-4">
+              <button onClick={() => signOut()} className="btn-secondary text-base py-1.5 sm:py-2 px-3 sm:px-4">
                 Logout
               </button>
             </div>
           ) : (
-            <Link href="/login" className="btn-primary text-sm py-1.5 sm:py-2 px-3 sm:px-4">
+            <Link href="/login" className="btn-primary text-base py-1.5 sm:py-2 px-3 sm:px-4">
               Login
             </Link>
           )}
@@ -59,7 +59,7 @@ export default function Navigation() {
 
         <button 
           onClick={() => setMenuOpen(!menuOpen)} 
-          className="sm:hidden text-lg"
+          className="sm:hidden text-2xl p-1"
           style={{ color: 'var(--foreground)' }}
         >
           {menuOpen ? '✕' : '☰'}
@@ -67,13 +67,13 @@ export default function Navigation() {
       </div>
 
       {menuOpen && (
-        <div className="sm:hidden border-t border-[var(--border)] px-3 py-3 space-y-2">
+        <div className="sm:hidden border-t border-[var(--border)] px-4 py-3 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className={`block py-2 text-sm ${pathname === link.href ? 'text-[var(--foreground-dim)]' : 'text-[var(--foreground)]'}`}
+              className={`block py-2 text-base sm:text-lg ${pathname === link.href ? 'text-[var(--foreground-dim)]' : 'text-[var(--foreground)]'}`}
             >
               {link.label}
             </Link>
@@ -81,15 +81,15 @@ export default function Navigation() {
           <div className="pt-2 border-t border-[var(--border)]">
             {user ? (
               <div className="space-y-2">
-                <Link href="/profile" className="block py-2 text-sm text-[var(--foreground)]">
+                <Link href="/profile" className="block py-2 text-base text-[var(--foreground)]">
                   Profile
                 </Link>
-                <button onClick={() => signOut()} className="btn-secondary text-sm py-2 px-4 w-full">
+                <button onClick={() => signOut()} className="btn-secondary text-base py-2 px-4 w-full">
                   Logout
                 </button>
               </div>
             ) : (
-              <Link href="/login" className="btn-primary text-sm py-2 px-4 block text-center">
+              <Link href="/login" className="btn-primary text-base py-2 px-4 block text-center">
                 Login
               </Link>
             )}

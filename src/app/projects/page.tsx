@@ -83,9 +83,9 @@ export default function ProjectsPage() {
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-xs text-[var(--muted)] mb-1">{'>'} projects_module</p>
-          <h1 className="text-2xl sm:text-3xl font-bold glow">Projects_</h1>
-          <p className="text-sm sm:text-base text-[var(--foreground-dim)] mt-2">Built by the community</p>
+          <p className="text-sm text-[var(--muted)] mb-1">{'>'} projects_module</p>
+          <h1 className="text-3xl sm:text-4xl font-bold glow">Projects_</h1>
+          <p className="text-base sm:text-lg text-[var(--foreground-dim)] mt-2">Built by the community</p>
         </div>
         {user && (
           <button onClick={() => setShowModal(true)} className="btn-primary text-base py-2.5 px-5 self-start sm:self-auto">
@@ -100,20 +100,20 @@ export default function ProjectsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search projects..."
-          className="input w-full max-w-sm"
+          className="input w-full max-w-sm text-base"
         />
       </div>
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-[var(--muted)]">{'>'} loading projects...</p>
+          <p className="text-base text-[var(--muted)]">{'>'} loading projects...</p>
         </div>
       ) : (
         <>
           <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
             <button
               onClick={() => setFilter('all')}
-              className={`text-sm py-1.5 px-3 border ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`text-base py-2 px-4 border ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
             >
               [all]
             </button>
@@ -121,7 +121,7 @@ export default function ProjectsPage() {
               <button
                 key={tech}
                 onClick={() => setFilter(tech)}
-                className={`text-sm py-1.5 px-3 border ${filter === tech ? 'btn-primary' : 'btn-secondary'}`}
+                className={`text-base py-2 px-4 border ${filter === tech ? 'btn-primary' : 'btn-secondary'}`}
               >
                 [{tech}]
               </button>
@@ -130,17 +130,17 @@ export default function ProjectsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredProjects.map((project) => (
-              <article key={project.id} className="card p-4 sm:p-5 flex flex-col justify-between">
+              <article key={project.id} className="card p-5 sm:p-6 flex flex-col justify-between">
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold mb-2 glow-subtle">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2 glow-subtle">
                     {project.title}
                   </h2>
-                  <p className="text-sm sm:text-base text-[var(--foreground-dim)] mb-3 sm:mb-4">{project.description}</p>
+                  <p className="text-base sm:text-lg text-[var(--foreground-dim)] mb-3 sm:mb-4">{project.description}</p>
                   
                   {project.tech && project.tech.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
                       {project.tech.map(tech => (
-                        <span key={tech} className="text-xs border border-[var(--border)] px-2 py-1 text-[var(--muted)]">
+                        <span key={tech} className="text-sm border border-[var(--border)] px-2.5 py-1 text-[var(--muted)]">
                           {tech}
                         </span>
                       ))}
@@ -149,7 +149,7 @@ export default function ProjectsPage() {
                 </div>
                 
                 <div>
-                  <div className="flex items-center justify-between text-xs text-[var(--muted)] pt-3 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between text-sm text-[var(--muted)] pt-3 border-t border-[var(--border)]">
                     <span>by @{project.author}</span>
                     <span>♥ {project.likes || 0}</span>
                   </div>
@@ -160,7 +160,7 @@ export default function ProjectsPage() {
                         href={project.url} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-xs text-[var(--accent)] hover:underline"
+                        className="text-sm text-[var(--accent)] hover:underline"
                       >
                         [visit site ↗]
                       </a>
@@ -177,15 +177,15 @@ export default function ProjectsPage() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="card p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold glow">Upload Project_</h2>
-              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)]">
+              <h2 className="text-xl sm:text-2xl font-bold glow">Upload Project_</h2>
+              <button onClick={() => setShowModal(false)} className="text-[var(--muted)] hover:text-[var(--foreground-dim)] text-xl">
                 ✕
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Title</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Title</p>
                 <input
                   type="text"
                   value={form.title}
@@ -196,7 +196,7 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Description</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Description</p>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -206,7 +206,7 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">Tech Stack (comma separated)</p>
+                <p className="text-sm text-[var(--muted)] mb-1">Tech Stack (comma separated)</p>
                 <input
                   type="text"
                   value={form.tech}
@@ -217,7 +217,7 @@ export default function ProjectsPage() {
               </div>
 
               <div>
-                <p className="text-xs text-[var(--muted)] mb-1">URL (optional)</p>
+                <p className="text-sm text-[var(--muted)] mb-1">URL (optional)</p>
                 <input
                   type="url"
                   value={form.url}

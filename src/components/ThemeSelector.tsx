@@ -23,7 +23,7 @@ export default function ThemeSelector() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="text-base sm:text-sm hover:opacity-70 transition-opacity"
+        className="text-xl sm:text-lg hover:opacity-70 transition-opacity p-1"
         style={{ color: 'var(--foreground)' }}
       >
         ◐
@@ -31,10 +31,10 @@ export default function ThemeSelector() {
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-48 z-50 rounded shadow-lg"
+          className="absolute right-0 top-full mt-2 w-52 z-50 rounded shadow-lg"
           style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
         >
-          <div className="p-2 text-xs" style={{ color: 'var(--muted)' }}>
+          <div className="p-2 text-sm font-semibold" style={{ color: 'var(--muted)' }}>
             Select Theme
           </div>
           {(Object.keys(themes) as Theme[]).map((t) => (
@@ -44,7 +44,7 @@ export default function ThemeSelector() {
                 setTheme(t)
                 setOpen(false)
               }}
-              className="w-full text-left px-3 py-2 text-sm transition-colors"
+              className="w-full text-left px-3 py-2 text-base transition-colors"
               style={{
                 background: theme === t ? 'var(--border)' : 'transparent',
                 color: 'var(--foreground)'

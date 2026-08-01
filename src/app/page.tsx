@@ -92,7 +92,7 @@ export default function Home() {
 (___)(___)(___)(___)(___)(___)(___)(___)(___)(___)
 `}</pre>
 
-          <div className="mb-2 text-sm sm:text-xs md:text-xs font-mono">
+          <div className="mb-2 text-base sm:text-lg font-mono">
             {lines.map((line, i) => (
               <div key={i} className="text-[var(--foreground-dim)]">{line}</div>
             ))}
@@ -104,15 +104,15 @@ export default function Home() {
 
           {booted && (
             <>
-              <p className="text-lg sm:text-xl text-[var(--foreground)] mb-4 sm:mb-6 glow">
+              <p className="text-2xl sm:text-3xl text-[var(--foreground)] mb-4 sm:mb-6 glow">
                 Tech community for teens_
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <Link href="/login" className="btn-primary text-center">
+                <Link href="/login" className="btn-primary text-center text-lg">
                   [ Join Now ]
                 </Link>
-                <Link href="/chat" className="btn-secondary text-center">
+                <Link href="/chat" className="btn-secondary text-center text-lg">
                   [ Explore ]
                 </Link>
               </div>
@@ -126,25 +126,25 @@ export default function Home() {
           <section className="py-6 sm:py-8 px-3 sm:px-4">
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <div className="card p-3 sm:p-4 text-center">
-                  <p className="text-xs text-[var(--muted)]">users online</p>
-                  <p className="text-xl sm:text-2xl font-bold glow">{stats.users}</p>
+                <div className="card p-4 sm:p-5 text-center">
+                  <p className="text-sm sm:text-base text-[var(--muted)] mb-1">users online</p>
+                  <p className="text-2xl sm:text-3xl font-bold glow">{stats.users}</p>
                 </div>
-                <div className="card p-3 sm:p-4 text-center">
-                  <p className="text-xs text-[var(--muted)]">messages</p>
-                  <p className="text-xl sm:text-2xl font-bold glow">{stats.messages}</p>
+                <div className="card p-4 sm:p-5 text-center">
+                  <p className="text-sm sm:text-base text-[var(--muted)] mb-1">messages</p>
+                  <p className="text-2xl sm:text-3xl font-bold glow">{stats.messages}</p>
                 </div>
-                <div className="card p-3 sm:p-4 text-center">
-                  <p className="text-xs text-[var(--muted)]">hackathons</p>
-                  <p className="text-xl sm:text-2xl font-bold glow">{stats.hackathons}</p>
+                <div className="card p-4 sm:p-5 text-center">
+                  <p className="text-sm sm:text-base text-[var(--muted)] mb-1">hackathons</p>
+                  <p className="text-2xl sm:text-3xl font-bold glow">{stats.hackathons}</p>
                 </div>
-                <div className="card p-3 sm:p-4 text-center">
-                  <p className="text-xs text-[var(--muted)]">status</p>
-                  <p className="text-xl sm:text-2xl font-bold glow-subtle text-[var(--foreground)]">ONLINE</p>
+                <div className="card p-4 sm:p-5 text-center">
+                  <p className="text-sm sm:text-base text-[var(--muted)] mb-1">status</p>
+                  <p className="text-2xl sm:text-3xl font-bold glow-subtle text-[var(--foreground)]">ONLINE</p>
                 </div>
               </div>
 
-              <h2 className="text-base sm:text-lg mb-3 sm:mb-4 text-[var(--foreground-dim)]">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[var(--foreground-dim)]">
                 {'> available modules'}
               </h2>
               
@@ -153,14 +153,14 @@ export default function Home() {
                   <Link 
                     key={feature.href} 
                     href={feature.href} 
-                    className="card p-4 hover:border-[var(--foreground)] transition-all"
+                    className="card p-5 hover:border-[var(--foreground)] transition-all"
                     style={{ animationDelay: `${i * 0.1}s` }}
                   >
-                    <p className="text-xs text-[var(--muted)] mb-1">{feature.cmd}</p>
-                    <h3 className="text-base sm:text-lg font-bold mb-1 glow-subtle">
+                    <p className="text-sm text-[var(--muted)] mb-1">{feature.cmd}</p>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-1 glow-subtle">
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-[var(--muted)]">{feature.description}</p>
+                    <p className="text-base sm:text-lg text-[var(--muted)]">{feature.description}</p>
                   </Link>
                 ))}
               </div>
@@ -169,10 +169,10 @@ export default function Home() {
 
           <section className="py-6 sm:py-8 px-3 sm:px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-base sm:text-lg mb-3 sm:mb-4 text-[var(--foreground-dim)]">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[var(--foreground-dim)]">
                 {'> recent activity'}
               </h2>
-              <div className="card p-3 sm:p-4 font-mono text-sm">
+              <div className="card p-4 sm:p-5 font-mono text-base">
                 {terminalLines.map((line, i) => (
                   <div key={i} className="text-[var(--foreground-dim)] mb-1">
                     <span className="text-[var(--muted)]">[{new Date().toLocaleTimeString()}]</span> {line}
@@ -184,16 +184,16 @@ export default function Home() {
 
           <section className="py-6 sm:py-8 px-3 sm:px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-base sm:text-lg mb-3 sm:mb-4 text-[var(--foreground-dim)]">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[var(--foreground-dim)]">
                 {'> about'}
               </h2>
-              <div className="card p-4 sm:p-5">
-                <p className="text-sm sm:text-base text-[var(--foreground-dim)] mb-3 sm:mb-4">
+              <div className="card p-5 sm:p-6">
+                <p className="text-base sm:text-xl text-[var(--foreground-dim)] mb-4">
                   Built by teens, for teens. A space to learn, share, and grow together.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {['Python', 'JavaScript', 'AI/ML', 'Web Dev', 'Game Dev'].map((tech) => (
-                    <span key={tech} className="text-xs border border-[var(--border)] px-2 py-1 text-[var(--muted)]">
+                    <span key={tech} className="text-sm border border-[var(--border)] px-3 py-1.5 text-[var(--muted)]">
                       {tech}
                     </span>
                   ))}
@@ -204,8 +204,8 @@ export default function Home() {
         </>
       )}
 
-      <footer className="py-4 sm:py-6 px-3 sm:px-4 border-t border-[var(--border)]">
-        <div className="max-w-4xl mx-auto text-center text-[var(--muted)] text-xs">
+      <footer className="py-5 sm:py-6 px-3 sm:px-4 border-t border-[var(--border)]">
+        <div className="max-w-4xl mx-auto text-center text-[var(--muted)] text-sm sm:text-base">
           <p>{'>'} © 2024 silicon_circle. system: {booted ? 'online_' : 'booting...'}</p>
         </div>
       </footer>

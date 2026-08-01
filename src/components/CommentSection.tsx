@@ -118,12 +118,12 @@ export default function CommentSection({ ideaId }: CommentSectionProps) {
   }
 
   if (loading) {
-    return <p className="text-xs text-[var(--muted)]">{'>'} loading comments...</p>
+    return <p className="text-sm text-[var(--muted)]">{'>'} loading comments...</p>
   }
 
   return (
     <div>
-      <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-4">
+      <p className="text-sm sm:text-base text-[var(--muted)] uppercase tracking-wider mb-4">
         Discussion ({allComments.length})
       </p>
 
@@ -135,12 +135,12 @@ export default function CommentSection({ ideaId }: CommentSectionProps) {
               value={mainComment}
               onChange={(e) => setMainComment(e.target.value)}
               placeholder="Share your thoughts or suggestions..."
-              className="input flex-1"
+              className="input flex-1 text-base"
             />
             <button
               onClick={handleMainSubmit}
               disabled={!mainComment.trim()}
-              className="btn-primary whitespace-nowrap"
+              className="btn-primary whitespace-nowrap text-base"
             >
               [post]
             </button>
@@ -166,7 +166,7 @@ export default function CommentSection({ ideaId }: CommentSectionProps) {
       </div>
 
       {topLevelComments.length === 0 && (
-        <p className="text-sm text-[var(--muted)] text-center py-8">
+        <p className="text-base text-[var(--muted)] text-center py-8">
           No comments yet. Be the first to share your thoughts!
         </p>
       )}
@@ -194,16 +194,16 @@ function Comment({
     <div className="border-b border-[var(--border)] pb-4 last:border-0">
       <div className="flex gap-3">
         <div className="flex-shrink-0 w-8 h-8 rounded bg-[var(--foreground)]/10 border border-[var(--border)] flex items-center justify-center">
-          <span className="text-xs font-bold text-[var(--foreground-dim)]">
+          <span className="text-sm font-bold text-[var(--foreground-dim)]">
             {comment.author?.username?.[0]?.toUpperCase() || 'U'}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-bold text-[var(--foreground)]">
+            <span className="text-base font-bold text-[var(--foreground)]">
               @{comment.author?.username || 'anonymous'}
             </span>
-            <span className="text-xs text-[var(--muted)]">
+            <span className="text-sm text-[var(--muted)]">
               {new Date(comment.created_at).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -212,7 +212,7 @@ function Comment({
               })}
             </span>
           </div>
-          <p className="text-sm text-[var(--foreground-dim)] mb-2">
+          <p className="text-base sm:text-lg text-[var(--foreground-dim)] mb-2">
             {comment.content}
           </p>
           
@@ -220,7 +220,7 @@ function Comment({
             <button
               onClick={handleUpvote}
               disabled={!user}
-              className={`flex items-center gap-1 text-xs transition-colors ${
+              className={`flex items-center gap-1 text-sm transition-colors ${
                 user ? 'text-[var(--muted)] hover:text-[var(--foreground-dim)]' : 'text-[var(--muted)] cursor-not-allowed'
               }`}
             >
@@ -232,7 +232,7 @@ function Comment({
             {user && (
               <button
                 onClick={() => onReply(comment.id)}
-                className="text-xs text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors"
+                className="text-sm text-[var(--muted)] hover:text-[var(--foreground-dim)] transition-colors"
               >
                 [reply]
               </button>
@@ -246,18 +246,18 @@ function Comment({
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder="Write your reply..."
-                className="input text-sm flex-1"
+                className="input text-base flex-1"
                 autoFocus
               />
               <button
                 onClick={() => onSubmitReply(comment.id)}
-                className="btn-primary text-sm py-1.5 px-3"
+                className="btn-primary text-base py-1.5 px-3"
               >
                 [reply]
               </button>
               <button
                 onClick={() => onReply('')}
-                className="btn-secondary text-sm py-1.5 px-3"
+                className="btn-secondary text-base py-1.5 px-3"
               >
                 [cancel]
               </button>
@@ -268,19 +268,19 @@ function Comment({
             <div className="mt-3 ml-4 sm:ml-6 border-l-2 border-[var(--border)] pl-3 sm:pl-4 space-y-3">
               {replies.map((reply) => {
                 return (
-                  <div key={reply.id} className="text-sm">
+                  <div key={reply.id} className="text-base">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-[var(--foreground)] text-xs sm:text-sm">
+                      <span className="font-bold text-[var(--foreground)] text-sm sm:text-base">
                         @{reply.author?.username || 'anonymous'}
                       </span>
-                      <span className="text-xs text-[var(--muted)]">
+                      <span className="text-sm text-[var(--muted)]">
                         {new Date(reply.created_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
                         })}
                       </span>
                     </div>
-                    <p className="text-[var(--foreground-dim)] text-xs sm:text-sm">
+                    <p className="text-[var(--foreground-dim)] text-base">
                       {reply.content}
                     </p>
                   </div>

@@ -45,13 +45,13 @@ export default function ThemeLoader() {
 function Loader80s({ progress }: { progress: number }) {
   return (
     <div className="text-center">
-      <pre className="text-[10px] sm:text-xs mb-3 sm:mb-4 text-[var(--foreground)] overflow-x-auto" style={{ color: 'var(--foreground)' }}>
+      <pre className="text-xs sm:text-sm mb-3 sm:mb-4 text-[var(--foreground)] overflow-x-auto" style={{ color: 'var(--foreground)' }}>
 {` ____  ____  ____  ____ 
 (___)(___)(___)(___)
 (__) SILICON CIRCLE (__)
 (__)(___)(___)(___)
 (___)(___)(___)(___)`}</pre>
-      <p className="text-xs sm:text-sm mb-2" style={{ color: 'var(--foreground)' }}>
+      <p className="text-sm sm:text-base mb-2" style={{ color: 'var(--foreground)' }}>
         {progress < 30 ? '> initializing...' : 
          progress < 60 ? '> loading modules...' :
          progress < 90 ? '> checking connection...' :
@@ -63,7 +63,7 @@ function Loader80s({ progress }: { progress: number }) {
           background: 'var(--foreground)' 
         }} />
       </div>
-      <p className="text-[10px] sm:text-xs mt-2" style={{ color: 'var(--muted)' }}>{Math.round(progress)}%</p>
+      <p className="text-xs sm:text-sm mt-2" style={{ color: 'var(--muted)' }}>{Math.round(progress)}%</p>
     </div>
   )
 }
@@ -73,11 +73,11 @@ function Loader90s({ progress }: { progress: number }) {
   return (
     <div className="text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
       <div className="bg-[#c0c0c0] p-2 rounded-sm w-full" style={{ background: 'var(--card-bg)' }}>
-        <div className="bg-[#000080] text-white px-3 py-1 text-xs sm:text-sm font-bold mb-2" style={{ background: 'var(--accent)' }}>
+        <div className="bg-[#000080] text-white px-3 py-1 text-sm sm:text-base font-bold mb-2" style={{ background: 'var(--accent)' }}>
           Silicon Circle
         </div>
         <div className="bg-[#c0c0c0] p-3 rounded-sm" style={{ background: 'var(--card-bg)' }}>
-          <p className="text-black text-xs sm:text-sm mb-2">Loading...</p>
+          <p className="text-black text-sm sm:text-base mb-2">Loading...</p>
           <div className="grid grid-cols-10 gap-1 mb-2">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="h-3 sm:h-4 bg-[#808080]" style={{ 
@@ -86,7 +86,7 @@ function Loader90s({ progress }: { progress: number }) {
               }} />
             ))}
           </div>
-          <p className="text-black text-[10px] sm:text-xs">Please wait...</p>
+          <p className="text-black text-xs sm:text-sm">Please wait...</p>
         </div>
       </div>
     </div>
@@ -97,14 +97,14 @@ function Loader2000s({ progress }: { progress: number }) {
   return (
     <div className="text-center" style={{ fontFamily: 'Tahoma, sans-serif' }}>
       <div className="w-full p-3 sm:p-4 rounded-lg" style={{ background: 'var(--cardBg)' }}>
-        <div className="text-white text-xs sm:text-sm mb-3 font-bold">Loading</div>
+        <div className="text-white text-sm sm:text-base mb-3 font-bold">Loading</div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
           <div className="h-full rounded-full transition-all duration-300" style={{ 
             width: `${Math.min(progress, 100)}%`,
             background: 'linear-gradient(90deg, #3399cc, #66ccff)'
           }} />
         </div>
-        <div className="flex justify-between mt-2 text-[10px] sm:text-xs" style={{ color: 'var(--foreground)' }}>
+        <div className="flex justify-between mt-2 text-xs sm:text-sm" style={{ color: 'var(--foreground)' }}>
           <span>{Math.round(progress)}%</span>
           <span>Loading resources...</span>
         </div>
@@ -135,7 +135,7 @@ function Loader2010s({ progress }: { progress: number }) {
             strokeDasharray="31.4 88.8" strokeLinecap="round" />
         </svg>
       </div>
-      <p className="text-xs sm:text-sm" style={{ color: 'var(--foreground)' }}>Loading...</p>
+      <p className="text-sm sm:text-base" style={{ color: 'var(--foreground)' }}>Loading...</p>
       <div className="flex gap-1 mt-2 justify-center">
         {[0, 1, 2].map(i => (
           <div 
@@ -169,7 +169,7 @@ function Loader2020s({ progress }: { progress: number }) {
           <div className="flex-1 h-2 rounded-full animate-pulse" style={{ background: 'var(--border)', animationDelay: '0.4s' }} />
         </div>
       </div>
-      <p className="text-[10px] sm:text-xs mt-3 sm:mt-4" style={{ color: 'var(--foregroundDim)' }}>
+      <p className="text-xs sm:text-sm mt-3 sm:mt-4" style={{ color: 'var(--foregroundDim)' }}>
         {Math.round(progress)}%
       </p>
     </div>
@@ -192,7 +192,7 @@ function LoaderFrutiger({ progress }: { progress: number }) {
           background: 'linear-gradient(90deg, #00a8e8, #00ffc8)'
         }} />
       </div>
-      <p className="text-xs sm:text-sm mt-3" style={{ color: 'var(--foreground)' }}>
+      <p className="text-sm sm:text-base mt-3" style={{ color: 'var(--foreground)' }}>
         Loading... {Math.round(progress)}%
       </p>
     </div>

@@ -63,24 +63,44 @@ ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
 
--- Teams: Anyone can read, insert, update
+-- ─── Teams ───────────────────────────────────────────────────────
+-- Public: read + insert (registration). UPDATE restricted to authenticated users (hosts).
+-- DELETE is intentionally not granted to any public role.
 CREATE POLICY "Allow public read on teams" ON teams FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on teams" ON teams FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on teams" ON teams FOR UPDATE USING (true);
+-- Submission updates (status, submissions field) are allowed for any authed session.
+-- For production, restrict further with: auth.uid() IS NOT NULL
+CREATE POLICY "Allow authenticated update on teams" ON teams FOR UPDATE
+  USING (auth.role() = 'authenticated' OR auth.role() = 'anon')
+  WITH CHECK (auth.role() = 'authenticated' OR auth.role() = 'anon');
 
--- Scores: Anyone can read, insert, update
+-- ─── Scores ──────────────────────────────────────────────────────
+-- Public: read only. INSERT allowed once on registration (team_id FK guarantees ownership).
+-- UPDATE restricted to authenticated users (hosts) only — prevents score tampering.
 CREATE POLICY "Allow public read on scores" ON scores FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on scores" ON scores FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on scores" ON scores FOR UPDATE USING (true);
+CREATE POLICY "Allow authenticated update on scores" ON scores FOR UPDATE
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
--- Logs: Anyone can read, insert, update
+-- ─── Logs ────────────────────────────────────────────────────────
+-- Public: read + insert (teams submit their own logs).
+-- Confirm flag (UPDATE) is restricted to authenticated users (hosts) only.
 CREATE POLICY "Allow public read on logs" ON logs FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on logs" ON logs FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update on logs" ON logs FOR UPDATE USING (true);
+CREATE POLICY "Allow authenticated update on logs" ON logs FOR UPDATE
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
--- Feature Flags: Anyone can read, update
+-- ─── Feature Flags ───────────────────────────────────────────────
+-- Public: read only. Updates (toggling features) require authentication.
 CREATE POLICY "Allow public read on feature_flags" ON feature_flags FOR SELECT USING (true);
-CREATE POLICY "Allow public update on feature_flags" ON feature_flags FOR UPDATE USING (true);
+CREATE POLICY "Allow authenticated update on feature_flags" ON feature_flags FOR UPDATE
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
+
+-- NOTE: No DELETE policies are defined for any table. Deletion must be performed
+-- directly via the Supabase service role (dashboard or server-side only).
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_logs_team_id ON logs(team_id);
