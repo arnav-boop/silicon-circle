@@ -22,8 +22,27 @@ export default function ProfilePage() {
   }, [user, loading, router])
 
   useEffect(() => {
-    if (username) setNewUsername(username)
+    if (username) {
+      setTimeout(() => setNewUsername(username), 0)
+    }
   }, [username])
+
+  useEffect(() => {
+    if (!user) return
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('bio, interests')
+        .eq('id', user.id)
+        .single()
+
+      if (!error && data) {
+        setBio(data.bio || '')
+        setInterests(data.interests || '')
+      }
+    }
+    fetchProfile()
+  }, [user, supabase])
 
   if (loading) {
     return (
@@ -49,27 +68,17 @@ export default function ProfilePage() {
     }
   }
 
-  const handleSaveBio = async () => {
+  const handleSaveChanges = async () => {
     setSaving(true)
     const { error } = await supabase
       .from('profiles')
-      .update({ bio })
+      .update({ bio, interests })
       .eq('id', user.id)
     setSaving(false)
     if (error) {
-      alert('Failed to update bio: ' + error.message)
-    }
-  }
-
-  const handleSaveInterests = async () => {
-    setSaving(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ interests })
-      .eq('id', user.id)
-    setSaving(false)
-    if (error) {
-      alert('Failed to update interests: ' + error.message)
+      alert('Failed to update profile: ' + error.message)
+    } else {
+      alert('Profile updated successfully!')
     }
   }
 
@@ -147,8 +156,12 @@ export default function ProfilePage() {
           />
         </div>
 
-        <button className="btn-primary text-base py-3 px-6 w-full sm:w-auto">
-          [ save changes ]
+        <button
+          onClick={handleSaveChanges}
+          disabled={saving}
+          className="btn-primary text-base py-3 px-6 w-full sm:w-auto"
+        >
+          {saving ? '[ saving... ]' : '[ save changes ]'}
         </button>
       </div>
     </div>

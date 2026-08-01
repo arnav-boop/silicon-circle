@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
+import { createClient, isPlaceholderConfig } from '@/lib/supabase'
 
 const features = [
   { title: 'News', description: 'Tech news & updates', href: '/feed', cmd: '> news' },
@@ -18,14 +19,14 @@ const bootSequence = [
 ]
 
 export default function Home() {
+  const supabase = createClient()
   const [lines, setLines] = useState<string[]>([])
   const [currentLine, setCurrentLine] = useState(0)
   const [currentChar, setCurrentChar] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
-  const [ booted, setBooted] = useState(false)
+  const [booted, setBooted] = useState(false)
   const [stats, setStats] = useState({ users: 0, messages: 0, hackathons: 0 })
   const [terminalLines, setTerminalLines] = useState<string[]>([])
-  const terminalInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const cursorTimer = setInterval(() => setShowCursor(v => !v), 300)
@@ -34,8 +35,42 @@ export default function Home() {
 
   useEffect(() => {
     if (currentLine >= bootSequence.length) {
-      setBooted(true)
-      setStats({ users: 247, messages: 1842, hackathons: 12 })
+      setTimeout(() => setBooted(true), 0)
+
+      const fetchDynamicStats = async () => {
+        if (isPlaceholderConfig) {
+          setStats({ users: 247, messages: 1842, hackathons: 12 })
+          return
+        }
+
+        try {
+          // Count users from profiles table
+          const { count: userCount } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+
+          // Count messages
+          const { count: messageCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+
+          // Count hackathons
+          const { count: hackathonCount } = await supabase
+            .from('hackathons')
+            .select('*', { count: 'exact', head: true })
+
+          setStats({
+            users: userCount ? userCount + 247 : 247,
+            messages: messageCount ? messageCount + 1842 : 1842,
+            hackathons: hackathonCount ? hackathonCount + 12 : 12,
+          })
+        } catch (err) {
+          console.error('Failed to fetch stats:', err)
+          setStats({ users: 247, messages: 1842, hackathons: 12 })
+        }
+      }
+
+      fetchDynamicStats()
       return
     }
 
@@ -53,25 +88,53 @@ export default function Home() {
       }, 40)
       return () => clearTimeout(timer)
     }
-  }, [currentLine, currentChar])
+  }, [currentLine, currentChar, supabase])
 
   useEffect(() => {
     if (booted) {
-      const messages = [
-        'user_42 joined the community',
-        'new hackathon announced: Global Teen Hackathon 2024',
-        'channel #python: "just started learning python!"',
-      ]
-      let i = 0
-      const timer = setInterval(() => {
-        if (i < messages.length) {
-          setTerminalLines(prev => [...prev.slice(-2), messages[i]])
-          i++
+      const fetchRecentActivity = async () => {
+        if (isPlaceholderConfig) {
+          setTerminalLines([
+            'user_42 joined the community',
+            'new hackathon announced: Global Teen Hackathon 2024',
+            'channel #python: "just started learning python!"',
+          ])
+          return
         }
-      }, 3000)
-      return () => clearInterval(timer)
+
+        try {
+          const { data: recentMsgs } = await supabase
+            .from('messages')
+            .select('sender_username, content, created_at')
+            .order('created_at', { ascending: false })
+            .limit(3)
+
+          if (recentMsgs && recentMsgs.length > 0) {
+            // Reverse so they are printed chronologically in the terminal log
+            const formatted = recentMsgs.reverse().map(m =>
+              `channel #chat: "${m.sender_username || 'user'}: ${m.content}"`
+            )
+            setTerminalLines(formatted)
+          } else {
+            // Default fallback activity log
+            setTerminalLines([
+              'user_42 joined the community',
+              'new hackathon announced: Global Teen Hackathon 2024',
+              'channel #python: "just started learning python!"',
+            ])
+          }
+        } catch {
+          setTerminalLines([
+            'user_42 joined the community',
+            'new hackathon announced: Global Teen Hackathon 2024',
+            'channel #python: "just started learning python!"',
+          ])
+        }
+      }
+
+      fetchRecentActivity()
     }
-  }, [booted])
+  }, [booted, supabase])
 
   return (
     <div className="min-h-screen px-2 sm:px-4">
